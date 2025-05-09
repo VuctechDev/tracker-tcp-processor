@@ -38,14 +38,12 @@ function decodePacket(hexStr: string, socket: net.Socket) {
 
   switch (protocol) {
     case "01": {
-      const imeiHex = hexStr.substring(8, 24);
-      const imei = imeiHex
+      const imei = hexStr
+        .substring(8, 24)
         .match(/.{1,2}/g)
-        ?.map((b) => parseInt(b, 16).toString().padStart(2, "0"))
+        ?.map((h) => parseInt(h, 16))
         .join("");
-
       console.log(`[LOGIN] IMEI: ${imei}`);
-
       sendAck(socket, "01");
       break;
     }
@@ -114,9 +112,7 @@ function decodePacket(hexStr: string, socket: net.Socket) {
       console.log(`  ▸ MNC: ${mnc}`);
       console.log(`  ▸ GPS Fix: ${gpsFix === 0 ? "No fix" : gpsFix + "D fix"}`);
       console.log(`  ▸ Satellites: ${satellites}`);
-      console.log(
-        `  ▸ Latitude: ${lat.toFixed(6)}, Longitude: ${lng.toFixed(6)}`
-      );
+      console.log(`  ▸ Latitude: ${lat.toFixed(6)}, Longitude: ${lng.toFixed(6)}`);
 
       sendAck(socket, "1B", timestamp);
       break;
