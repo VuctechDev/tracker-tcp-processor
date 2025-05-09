@@ -38,12 +38,14 @@ function decodePacket(hexStr: string, socket: net.Socket) {
 
   switch (protocol) {
     case "01": {
-      const imei = hexStr
-        .substring(8, 24)
+      const imeiHex = hexStr.substring(8, 24);
+      const imei = imeiHex
         .match(/.{1,2}/g)
-        ?.map((h) => parseInt(h, 16))
+        ?.map((b) => parseInt(b, 16).toString().padStart(2, "0"))
         .join("");
+
       console.log(`[LOGIN] IMEI: ${imei}`);
+
       sendAck(socket, "01");
       break;
     }
