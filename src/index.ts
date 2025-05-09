@@ -22,6 +22,7 @@ function decodeLoginPacket(buffer: any) {
 
 // === Helper: Decode GPS Packet (Protocol 0x10 or 0x11) ===
 function decodeGpsPacket(buffer: any) {
+  console.log("decodeGpsPacket USO");
   const dateBytes = buffer.slice(4, 10);
   const dateStr = [...dateBytes]
     .map((b) => b.toString(16).padStart(2, "0"))
@@ -48,19 +49,21 @@ const server = net.createServer((socket) => {
     const hexStr = bufferToHex(data);
     console.log(`Received Raw: ${hexStr}`);
 
+    if (data.length < 5 || data[0] !== 0x78 || data[1] !== 0x78) {
+      console.log("Invalid or non-GPS packet. Ignored.");
+      return;
+    }
+
     const protocol = data[3];
     switch (protocol) {
       case 0x01:
         decodeLoginPacket(data);
-        // Send back login response
-        const response = Buffer.from("787801010D0A", "hex");
-        socket.write(response);
+        socket.write(Buffer.from("787801010D0A", "hex"));
         console.log("Sent Login Acknowledgment");
         break;
       case 0x10:
       case 0x11:
         decodeGpsPacket(data);
-        // Send back GPS response
         const gpsResponse = Buffer.from(
           "78780010" + hexStr.slice(8, 20) + "0D0A",
           "hex"
@@ -69,7 +72,9 @@ const server = net.createServer((socket) => {
         console.log("Sent GPS Acknowledgment");
         break;
       default:
-        console.log(`Unknown Protocol: 0x${protocol.toString(16)}`);
+        console.log(
+          `Unknown or unsupported protocol: 0x${protocol.toString(16)}`
+        );
     }
   });
 

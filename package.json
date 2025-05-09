@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "nodemon"
+    "dev": "nodemon",
+    "push": "GIT_SSH_COMMAND='ssh -i /.ssh/id_rsa_vuctech' git push"
   },
   "keywords": [],
   "author": "",
