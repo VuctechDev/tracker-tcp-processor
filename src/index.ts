@@ -38,10 +38,9 @@ function decodePacket(hexStr: string, socket: net.Socket) {
 
   switch (protocol) {
     case "01": {
-      const imei = hexStr
-        .substring(8, 24)
-        .match(/.{1,2}/g)
-        ?.map((h) => parseInt(h, 16))
+      const imeiBytes = hexStr.substring(8, 24).match(/.{1,2}/g) || [];
+      const imei = imeiBytes
+        .map((b) => parseInt(b, 16).toString(16).padStart(2, "0"))
         .join("");
       console.log(`[LOGIN] IMEI: ${imei}`);
       sendAck(socket, "01");
@@ -101,18 +100,24 @@ function decodePacket(hexStr: string, socket: net.Socket) {
 
       const mcc = hexStr.substring(22, 26);
       const mnc = hexStr.substring(26, 28);
+      const lac = hexStr.substring(28, 32);
+      const cellId = hexStr.substring(32, 40);
 
-      const rawLat = parseInt(hexStr.substring(40, 48), 16);
-      const rawLng = parseInt(hexStr.substring(48, 56), 16);
-      const lat = rawLat / 30000 / 60;
-      const lng = rawLng / 30000 / 60;
+      const latHex = hexStr.substring(40, 48);
+      const lngHex = hexStr.substring(48, 56);
+      const lat = parseInt(latHex, 16) / 30000 / 60;
+      const lng = parseInt(lngHex, 16) / 30000 / 60;
 
       console.log(`[LBS+GPS] Time: ${timestamp}`);
       console.log(`  ▸ MCC: ${mcc}`);
       console.log(`  ▸ MNC: ${mnc}`);
-      console.log(`  ▸ GPS Fix: ${gpsFix === 0 ? "No fix" : gpsFix + "D fix"}`);
+      console.log(`  ▸ LAC: ${lac}`);
+      console.log(`  ▸ Cell ID: ${cellId}`);
+      console.log(`  ▸ GPS Fix: ${gpsFix === 0 ? "No fix" : `${gpsFix}D fix`}`);
       console.log(`  ▸ Satellites: ${satellites}`);
-      console.log(`  ▸ Latitude: ${lat.toFixed(6)}, Longitude: ${lng.toFixed(6)}`);
+      console.log(
+        `  ▸ Latitude: ${lat.toFixed(6)}, Longitude: ${lng.toFixed(6)}`
+      );
 
       sendAck(socket, "1B", timestamp);
       break;
