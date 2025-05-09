@@ -93,6 +93,22 @@ function decodePacket(hexStr: string, socket: net.Socket) {
       break;
     }
 
+    case "1B": {
+      const timestamp = hexStr.substring(8, 20);
+      const rawLat = parseInt(hexStr.substring(24, 32), 16);
+      const rawLng = parseInt(hexStr.substring(32, 40), 16);
+      const lat = rawLat / 30000 / 60;
+      const lng = rawLng / 30000 / 60;
+
+      console.log(
+        `[LBS+GPS] Time: ${timestamp}, Lat: ${lat.toFixed(
+          6
+        )}, Lng: ${lng.toFixed(6)}`
+      );
+      sendAck(socket, "1B", timestamp);
+      break;
+    }
+
     default:
       console.log(
         `[UNKNOWN] Protocol ${protocol} received. Raw data: ${hexStr}`
