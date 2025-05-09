@@ -95,16 +95,27 @@ function decodePacket(hexStr: string, socket: net.Socket) {
 
     case "1B": {
       const timestamp = hexStr.substring(8, 20);
-      const rawLat = parseInt(hexStr.substring(24, 32), 16);
-      const rawLng = parseInt(hexStr.substring(32, 40), 16);
+      const gpsInfoByte = parseInt(hexStr.substring(20, 22), 16);
+      const gpsFix = (gpsInfoByte & 0xf0) >> 4;
+      const satellites = gpsInfoByte & 0x0f;
+
+      const mcc = hexStr.substring(22, 26);
+      const mnc = hexStr.substring(26, 28);
+
+      const rawLat = parseInt(hexStr.substring(40, 48), 16);
+      const rawLng = parseInt(hexStr.substring(48, 56), 16);
       const lat = rawLat / 30000 / 60;
       const lng = rawLng / 30000 / 60;
 
+      console.log(`[LBS+GPS] Time: ${timestamp}`);
+      console.log(`  ▸ MCC: ${mcc}`);
+      console.log(`  ▸ MNC: ${mnc}`);
+      console.log(`  ▸ GPS Fix: ${gpsFix === 0 ? "No fix" : gpsFix + "D fix"}`);
+      console.log(`  ▸ Satellites: ${satellites}`);
       console.log(
-        `[LBS+GPS] Time: ${timestamp}, Lat: ${lat.toFixed(
-          6
-        )}, Lng: ${lng.toFixed(6)}`
+        `  ▸ Latitude: ${lat.toFixed(6)}, Longitude: ${lng.toFixed(6)}`
       );
+
       sendAck(socket, "1B", timestamp);
       break;
     }
