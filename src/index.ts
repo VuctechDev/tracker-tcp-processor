@@ -32,6 +32,13 @@ function getCurrentGMTTimeHex(): string {
   return year + month + day + hour + minute + second;
 }
 
+function decodeGpsCoordinate(coordHex: string): number {
+  const coord = parseInt(coordHex, 16);
+  const degrees = Math.floor(coord / 1000000);
+  const minutes = (coord % 1000000) / 10000;
+  return degrees + minutes / 60;
+}
+
 function decodePacket(hexStr: string, socket: net.Socket) {
   const protocol = hexStr.substring(6, 8);
   console.log(`[INFO] Protocol: ${protocol}`);
@@ -54,15 +61,11 @@ function decodePacket(hexStr: string, socket: net.Socket) {
     case "10": {
       const dateTime = hexStr.substring(8, 20);
       console.log(`[GPS] DateTime: ${dateTime}`);
-      const latitudeHex = hexStr.substring(24, 32);
-      const longitudeHex = hexStr.substring(32, 40);
-      const latitude = parseInt(latitudeHex, 16) / 30000 / 60;
-      const longitude = parseInt(longitudeHex, 16) / 30000 / 60;
-      console.log(
-        `[GPS] Latitude: ${latitude.toFixed(6)}, Longitude: ${longitude.toFixed(
-          6
-        )}`
-      );
+      const latHex = hexStr.substring(20, 28);
+      const lngHex = hexStr.substring(28, 36);
+      const lat = decodeGpsCoordinate(latHex);
+      const lng = decodeGpsCoordinate(lngHex);
+      console.log(`  ▸ Latitude: ${lat.toFixed(6)}, Longitude: ${lng.toFixed(6)}`);
       sendAck(socket, "10", dateTime);
       break;
     }
@@ -70,15 +73,11 @@ function decodePacket(hexStr: string, socket: net.Socket) {
     case "11": {
       const dateTime = hexStr.substring(8, 20);
       console.log(`[GPS] DateTime: ${dateTime}`);
-      const latitudeHex = hexStr.substring(24, 32);
-      const longitudeHex = hexStr.substring(32, 40);
-      const latitude = parseInt(latitudeHex, 16) / 30000 / 60;
-      const longitude = parseInt(longitudeHex, 16) / 30000 / 60;
-      console.log(
-        `[GPS] Latitude: ${latitude.toFixed(6)}, Longitude: ${longitude.toFixed(
-          6
-        )}`
-      );
+      const latHex = hexStr.substring(20, 28);
+      const lngHex = hexStr.substring(28, 36);
+      const lat = decodeGpsCoordinate(latHex);
+      const lng = decodeGpsCoordinate(lngHex);
+      console.log(`  ▸ Latitude: ${lat.toFixed(6)}, Longitude: ${lng.toFixed(6)}`);
       sendAck(socket, "11", dateTime);
       break;
     }
@@ -126,8 +125,8 @@ function decodePacket(hexStr: string, socket: net.Socket) {
 
       const latHex = hexStr.substring(40, 48);
       const lngHex = hexStr.substring(48, 56);
-      const lat = parseInt(latHex, 16) / 30000 / 60;
-      const lng = parseInt(lngHex, 16) / 30000 / 60;
+      const lat = decodeGpsCoordinate(latHex);
+      const lng = decodeGpsCoordinate(lngHex);
 
       console.log(`[LBS+GPS] Time: ${timestamp}`);
       console.log(`  ▸ MCC: ${mcc}`);
@@ -136,9 +135,7 @@ function decodePacket(hexStr: string, socket: net.Socket) {
       console.log(`  ▸ Cell ID: ${cellId}`);
       console.log(`  ▸ GPS Fix: ${gpsFix === 0 ? "No fix" : `${gpsFix}D fix`}`);
       console.log(`  ▸ Satellites: ${satellites}`);
-      console.log(
-        `  ▸ Latitude: ${lat.toFixed(6)}, Longitude: ${lng.toFixed(6)}`
-      );
+      console.log(`  ▸ Latitude: ${lat.toFixed(6)}, Longitude: ${lng.toFixed(6)}`);
 
       sendAck(socket, "1B", timestamp);
       break;
