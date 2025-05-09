@@ -51,7 +51,22 @@ function decodePacket(hexStr: string, socket: net.Socket) {
       sendAck(socket, "08");
       break;
 
-    case "10":
+    case "10": {
+      const dateTime = hexStr.substring(8, 20);
+      console.log(`[GPS] DateTime: ${dateTime}`);
+      const latitudeHex = hexStr.substring(24, 32);
+      const longitudeHex = hexStr.substring(32, 40);
+      const latitude = parseInt(latitudeHex, 16) / 30000 / 60;
+      const longitude = parseInt(longitudeHex, 16) / 30000 / 60;
+      console.log(
+        `[GPS] Latitude: ${latitude.toFixed(6)}, Longitude: ${longitude.toFixed(
+          6
+        )}`
+      );
+      sendAck(socket, "10", dateTime);
+      break;
+    }
+
     case "11": {
       const dateTime = hexStr.substring(8, 20);
       console.log(`[GPS] DateTime: ${dateTime}`);
@@ -64,7 +79,7 @@ function decodePacket(hexStr: string, socket: net.Socket) {
           6
         )}`
       );
-      sendAck(socket, protocol, dateTime);
+      sendAck(socket, "11", dateTime);
       break;
     }
 
@@ -89,6 +104,12 @@ function decodePacket(hexStr: string, socket: net.Socket) {
       const timeReply = Buffer.from("78780730" + currentTime + "0d0a", "hex");
       socket.write(timeReply);
       console.log(`[TIME SYNC] Time sync sent: ${currentTime}`);
+      break;
+    }
+
+    case "80": {
+      console.log(`[KEEPALIVE] Protocol 0x80 keep-alive received.`);
+      sendAck(socket, "80");
       break;
     }
 
