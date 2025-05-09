@@ -1,42 +1,103 @@
 import net from "net";
 
 // === CONFIGURATION SECTION ===
-const PORT = 5001; // Your server port
-const HOST = "0.0.0.0"; // Listen on all interfaces
+const PORT = 5001;
+const HOST = "0.0.0.0";
 
 // === Helper: Convert Buffer to Hex String ===
-function bufferToHex(buffer: any) {
+function bufferToHex(buffer: Buffer) {
   return buffer.toString("hex").toUpperCase();
 }
 
-// === Helper: Decode Login Packet (Protocol 0x01) ===
-function decodeLoginPacket(buffer: any) {
-  const imei = buffer
-    .slice(4, 12)
-    .toString("hex")
-    .match(/.{1,2}/g)
-    .join("");
-  const version = buffer[12];
-  console.log(`Device Login: IMEI ${imei}, Software Version ${version}`);
+function sendAck(socket: net.Socket, protocolNumber: string, timeHex = "") {
+  const header = "7878";
+  const length = "00";
+  const footer = "0d0a";
+  const ack = Buffer.from(
+    header + length + protocolNumber + timeHex + footer,
+    "hex"
+  );
+  socket.write(ack);
+  console.log(`>> [SENT] Ack sent for protocol ${protocolNumber}`);
 }
 
-// === Helper: Decode GPS Packet (Protocol 0x10 or 0x11) ===
-function decodeGpsPacket(buffer: any) {
-  console.log("decodeGpsPacket USO");
-  const dateBytes = buffer.slice(4, 10);
-  const dateStr = [...dateBytes]
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-  const year = 2000 + parseInt(dateStr.slice(0, 2), 16);
-  const month = parseInt(dateStr.slice(2, 4), 16);
-  const day = parseInt(dateStr.slice(4, 6), 16);
-  const hour = parseInt(dateStr.slice(6, 8), 16);
-  const minute = parseInt(dateStr.slice(8, 10), 16);
-  const second = parseInt(dateStr.slice(10, 12), 16);
-  console.log(
-    `GPS Timestamp: ${year}-${month}-${day} ${hour}:${minute}:${second}`
-  );
-  // You can extend here: parse lat/lon, speed, etc.
+function getCurrentGMTTimeHex(): string {
+  const now = new Date();
+  const year = (now.getUTCFullYear() % 100).toString(16).padStart(2, "0");
+  const month = (now.getUTCMonth() + 1).toString(16).padStart(2, "0");
+  const day = now.getUTCDate().toString(16).padStart(2, "0");
+  const hour = now.getUTCHours().toString(16).padStart(2, "0");
+  const minute = now.getUTCMinutes().toString(16).padStart(2, "0");
+  const second = now.getUTCSeconds().toString(16).padStart(2, "0");
+  return year + month + day + hour + minute + second;
+}
+
+function decodePacket(hexStr: string, socket: net.Socket) {
+  const protocol = hexStr.substring(6, 8);
+  console.log(`[INFO] Protocol: ${protocol}`);
+
+  switch (protocol) {
+    case "01": {
+      const imei = hexStr
+        .substring(8, 24)
+        .match(/.{1,2}/g)
+        ?.map((h) => parseInt(h, 16))
+        .join("");
+      console.log(`[LOGIN] IMEI: ${imei}`);
+      sendAck(socket, "01");
+      break;
+    }
+    case "08":
+      console.log("[HEARTBEAT] Heartbeat packet received.");
+      sendAck(socket, "08");
+      break;
+
+    case "10":
+    case "11": {
+      const dateTime = hexStr.substring(8, 20);
+      console.log(`[GPS] DateTime: ${dateTime}`);
+      const latitudeHex = hexStr.substring(24, 32);
+      const longitudeHex = hexStr.substring(32, 40);
+      const latitude = parseInt(latitudeHex, 16) / 30000 / 60;
+      const longitude = parseInt(longitudeHex, 16) / 30000 / 60;
+      console.log(
+        `[GPS] Latitude: ${latitude.toFixed(6)}, Longitude: ${longitude.toFixed(
+          6
+        )}`
+      );
+      sendAck(socket, protocol, dateTime);
+      break;
+    }
+
+    case "13": {
+      const battery = parseInt(hexStr.substring(8, 10), 16);
+      console.log(`[STATUS] Battery: ${battery}%`);
+      sendAck(socket, "13");
+      break;
+    }
+
+    case "17":
+    case "69": {
+      const time = hexStr.substring(10, 22);
+      console.log(`[WIFI LBS] DateTime: ${time}`);
+      sendAck(socket, protocol, time);
+      break;
+    }
+
+    case "30": {
+      console.log("[TIME SYNC] Device requests time sync.");
+      const currentTime = getCurrentGMTTimeHex();
+      const timeReply = Buffer.from("78780730" + currentTime + "0d0a", "hex");
+      socket.write(timeReply);
+      console.log(`[TIME SYNC] Time sync sent: ${currentTime}`);
+      break;
+    }
+
+    default:
+      console.log(
+        `[UNKNOWN] Protocol ${protocol} received. Raw data: ${hexStr}`
+      );
+  }
 }
 
 // === Create TCP Server ===
@@ -47,35 +108,14 @@ const server = net.createServer((socket) => {
 
   socket.on("data", (data) => {
     const hexStr = bufferToHex(data);
-    console.log(`Received Raw: ${hexStr}`);
+    console.log(`[RECEIVED] ${hexStr}`);
 
     if (data.length < 5 || data[0] !== 0x78 || data[1] !== 0x78) {
       console.log("Invalid or non-GPS packet. Ignored.");
       return;
     }
 
-    const protocol = data[3];
-    switch (protocol) {
-      case 0x01:
-        decodeLoginPacket(data);
-        socket.write(Buffer.from("787801010D0A", "hex"));
-        console.log("Sent Login Acknowledgment");
-        break;
-      case 0x10:
-      case 0x11:
-        decodeGpsPacket(data);
-        const gpsResponse = Buffer.from(
-          "78780010" + hexStr.slice(8, 20) + "0D0A",
-          "hex"
-        );
-        socket.write(gpsResponse);
-        console.log("Sent GPS Acknowledgment");
-        break;
-      default:
-        console.log(
-          `Unknown or unsupported protocol: 0x${protocol.toString(16)}`
-        );
-    }
+    decodePacket(hexStr, socket);
   });
 
   socket.on("close", () => {
@@ -87,12 +127,10 @@ const server = net.createServer((socket) => {
   });
 });
 
-// === Start Listening ===
 server.listen(PORT, HOST, () => {
   console.log(`Server listening on ${HOST}:${PORT}`);
 });
 
-// === Handle Server Errors ===
 server.on("error", (err) => {
   console.error(`Server Error: ${err.message}`);
 });
