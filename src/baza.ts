@@ -5,6 +5,7 @@ const pool = mySql.createPool({
   user: "pikadone_tracking",
   password: "Tracking2025",
   database: "pikadone_track",
+  port: 3306,
 });
 
 export const query = <T>(
