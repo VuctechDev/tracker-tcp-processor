@@ -4,7 +4,6 @@ import net from "net";
 const PORT = 5001;
 const HOST = "0.0.0.0";
 
-// === Helper: Convert Buffer to Hex String ===
 function bufferToHex(buffer: Buffer) {
   return buffer.toString("hex").toUpperCase();
 }
@@ -83,10 +82,15 @@ function decodePacket(hexStr: string, socket: net.Socket) {
       sendAck(socket, "11", dateTime);
       break;
     }
-
     case "13": {
       const battery = parseInt(hexStr.substring(8, 10), 16);
+      const version = parseInt(hexStr.substring(10, 12), 16);
+      const tz = parseInt(hexStr.substring(12, 14), 16);
+      const interval = parseInt(hexStr.substring(14, 16), 16);
       console.log(`[STATUS] Battery: ${battery}%`);
+      console.log(`[STATUS] Version: ${version}`);
+      console.log(`[STATUS] TZ: ${tz}`);
+      console.log(`[STATUS] Interval: ${interval}%`);
       sendAck(socket, "13");
       break;
     }
