@@ -40,21 +40,23 @@ export function parseGpsPacket(hexStr: string): GpsPacket | null {
     const protocol = hexStr.substring(6, 8);
     if (protocol !== "10") throw new Error("Not a GPS packet");
 
-    const dateTimeHex = hexStr.substring(8, 20);
+    const dateTimeHex = hexStr.substring(8, 20); // "19050C121210"
     const dateTimeUTC = convertHexDateTimeToUTC(dateTimeHex);
 
-    const latHex = hexStr.substring(20, 28);
-    const lngHex = hexStr.substring(28, 36);
-    const speedHex = hexStr.substring(36, 38);
-    const statusHex = hexStr.substring(38, 42);
+    const latHex = hexStr.substring(22, 30); // "04CC2B73"
+    const lngHex = hexStr.substring(30, 38); // "01D781FC"
+    const speedHex = hexStr.substring(38, 40); // "00"
+    const statusHex = hexStr.substring(40, 44); // "34EC"
 
     const speed = parseInt(speedHex, 16);
-    const statusBin = parseInt(statusHex, 16).toString(2).padStart(16, "0");
 
-    const positioned = statusBin[5] === "1";
-    const east = statusBin[6] === "0";
-    const north = statusBin[7] === "1";
-    const heading = parseInt(statusBin.slice(8), 2);
+    const statusBin = parseInt(statusHex, 16).toString(2).padStart(16, "0");
+    // Example: "0011010011101100"
+
+    const positioned = statusBin[5] === "1"; // bit 5: GPS fix
+    const east = statusBin[6] === "0"; // bit 6: 0 = East, 1 = West
+    const north = statusBin[7] === "1"; // bit 7: 1 = North, 0 = South
+    const heading = parseInt(statusBin.slice(8), 2); // last 8 bits = heading (0–359)
 
     const latitude = decodeGpsCoordinate(latHex, north);
     const longitude = decodeGpsCoordinate(lngHex, east);
