@@ -54,9 +54,10 @@ export function parseGpsPacket(hexStr: string): GpsPacket | null {
     const byte1 = (status >> 8) & 0xff; // first byte (status flags)
     const byte2 = status & 0xff; // second byte (heading)
 
-    const positioned = (byte1 & 0x20) !== 0; // Bit 5: GPS fix
+    const positioned = (byte1 & 0x20) !== 0; // Bit 5: 1 = fixed, 0 = not fixed
     const east = (byte1 & 0x40) === 0; // Bit 6: 0 = East, 1 = West
-    const north = (byte1 & 0x80) !== 0; // Bit 7: 1 = North, 0 = South
+    const north = (byte1 & 0x80) === 0; // Bit 7: 0 = North, 1 = South ✅ fixed
+
     const heading = byte2;
     const gpsSatByte = hexStr.substring(20, 22); // e.g. "9C"
     const satCount = parseInt(gpsSatByte, 16) & 0x0f; // mask lower nibble only
