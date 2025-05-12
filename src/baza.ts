@@ -40,8 +40,9 @@ export const insertInDB = (data: any) => {
   const time = new Date();
   const formattedTime = time.toISOString().slice(0, 19).replace("T", " ");
   query(
-    `INSERT INTO transport (device_id, time, longi, lati, battery) VALUES (${device_id}, ${formattedTime}, ${longitude}, ${latitude}, ${battery})`
-  );
+    `INSERT INTO transport (device_id, time, longi, lati, battery) VALUES (?, ?, ?, ?, ?)`,
+    [[device_id, time, longitude, latitude, battery]]
+  ).catch((err) => console.error("DB Insert Error:", err));
 };
 
 // export const insertInDB = (data: any) => {
