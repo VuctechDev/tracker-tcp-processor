@@ -34,9 +34,9 @@ export const query = <T>(
 
 export const insertInDB = (data: any) => {
   const device_id = "0861261021070616";
-  const latitude = data.latitude;
+  const latitude = data.latitude??.toFixed(5;
   const longitude = data.longitude?.toFixed(5);
-  const battery = data.speed?.toFixed(5);
+  const battery = 89;
   const time = new Date();
   const formattedTime = time.toISOString().slice(0, 19).replace("T", " ");
   query(
