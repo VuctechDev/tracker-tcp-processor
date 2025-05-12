@@ -1,14 +1,3 @@
-// Uvoz modula za rad sa MySQL
-import mysql from "mysql";
-
-// Kreiranje konekcije ka bazi
-const connection = mysql.createConnection({
-  host: "sv95.ifastnet.com",
-  user: "pikadone_tracking",
-  password: "Tracking2025",
-  database: "pikadone_track",
-});
-
 import mySql from "mysql";
 
 const pool = mySql.createPool({
