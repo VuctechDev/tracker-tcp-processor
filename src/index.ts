@@ -2,6 +2,7 @@ import net from "net";
 import { parseStatusPacket } from "./status";
 import { parseGpsPacket } from "./gps";
 import http from "http";
+import { insertInDB } from "./baza";
 
 // === CONFIGURATION SECTION ===
 const PORT = 5001;
@@ -63,6 +64,7 @@ function decodePacket(hexStr: string, socket: net.Socket) {
       break;
     case "10": {
       const data = parseGpsPacket(hexStr);
+      insertInDB(data);
       sendAck(socket, "10", data?.dateTime);
       break;
     }
@@ -172,25 +174,4 @@ server.listen(PORT, HOST, () => {
 
 server.on("error", (err) => {
   console.error(`Server Error: ${err.message}`);
-});
-
-const HTTP_PORT = 3000;
-
-const httpServer = http.createServer((req, res) => {
-  if (req.method === "GET" && req.url === "/status") {
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(
-      JSON.stringify({
-        status: "TCP server is running",
-        timestamp: new Date().toISOString(),
-      })
-    );
-  } else {
-    res.writeHead(404, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ error: "Not found" }));
-  }
-});
-
-httpServer.listen(HTTP_PORT, () => {
-  console.log(`HTTP server listening on http://localhost:${HTTP_PORT}`);
 });
