@@ -10,12 +10,16 @@ interface GpsPacket {
   positioned: boolean;
 }
 
-function decodeGpsCoordinate(hex: string): number {
-  const raw = parseInt(hex, 16); // Convert hex to integer
-  const totalMinutes = raw / 30000; // Device encodes minutes * 30000
+function decodeGpsCoordinate(hex: string, isPositive: boolean): number {
+  console.log(`[GEO HEX]: ${hex}`);
+  const raw = parseInt(hex, 16);
+  const totalMinutes = raw / 30000;
   const degrees = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes - degrees * 60;
-  return degrees + minutes / 60; // Decimal degrees
+  const decimal = degrees + minutes / 60;
+  const value = isPositive ? decimal : -decimal;
+  console.log(`[GEO VALUE]: ${value}`);
+  return value;
 }
 
 function convertHexDateTimeToUTC(hex: string): string {
@@ -52,8 +56,8 @@ export function parseGpsPacket(hexStr: string): GpsPacket | null {
     const north = statusBin[7] === "1";
     const heading = parseInt(statusBin.slice(8), 2);
 
-    const latitude = decodeGpsCoordinate(latHex);
-    const longitude = decodeGpsCoordinate(lngHex);
+    const latitude = decodeGpsCoordinate(latHex, north);
+    const longitude = decodeGpsCoordinate(lngHex, east);
 
     // ✅ Logging
     console.log(`[INFO] Protocol: ${protocol}`);
