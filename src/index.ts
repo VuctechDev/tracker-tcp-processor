@@ -1,6 +1,7 @@
 import net from "net";
 import { parseStatusPacket } from "./status";
 import { parseGpsPacket } from "./gps";
+import http from "http";
 
 // === CONFIGURATION SECTION ===
 const PORT = 5001;
@@ -60,44 +61,15 @@ function decodePacket(hexStr: string, socket: net.Socket) {
       console.log("[HEARTBEAT] Heartbeat packet received.");
       sendAck(socket, "08");
       break;
-
     case "10": {
-      // const dateTime = hexStr.substring(8, 20);
-      // console.log(`[GPS] DateTime: ${dateTime}`);
-      // const latHex = hexStr.substring(20, 28);
-      // const lngHex = hexStr.substring(28, 36);
-      // const lat = decodeGpsCoordinate(latHex);
-      // const lng = decodeGpsCoordinate(lngHex);
-      // console.log(
-      //   `  ▸ Latitude: ${lat.toFixed(6)}, Longitude: ${lng.toFixed(6)}`
-      // );
-
-      //       [RECEIVED] 7878151019050C10081B9A04CC2B1C01D7814200353300BD000D0A
-      // 2025-05-12T16:08:30.781536398Z [INFO] Protocol: 10
-      // 2025-05-12T16:08:30.782744105Z [INFO] Protocol: 10
-      // 2025-05-12T16:08:30.782818821Z [GPS] DateTime: 19050C10081B
-      // 2025-05-12T16:08:30.783081066Z [GPS] UTC Time: 2025-05-12T16:08:27.000Z
-      // 2025-05-12T16:08:30.783100071Z   ▸ Latitude: 1435.558708, Longitude: 261.045974
-      // 2025-05-12T16:08:30.783112407Z   ▸ Speed: 66 km/h
-      // 2025-05-12T16:08:30.783127324Z   ▸ Heading: 53°
-      // 2025-05-12T16:08:30.783142439Z   ▸ Positioning: No, South latitude, East longitude
-      // 2025-05-12T16:08:30.783470436Z >> [SENT] Ack sent for protocol 10, 7878001019050C10081B0D0A
-      const a = parseGpsPacket(hexStr);
-      sendAck(socket, "10", a?.dateTime);
+      const data = parseGpsPacket(hexStr);
+      sendAck(socket, "10", data?.dateTime);
       break;
     }
 
     case "11": {
-      const dateTime = hexStr.substring(8, 20);
-      console.log(`[GPS] DateTime: ${dateTime}`);
-      const latHex = hexStr.substring(20, 28);
-      const lngHex = hexStr.substring(28, 36);
-      const lat = decodeGpsCoordinate(latHex);
-      const lng = decodeGpsCoordinate(lngHex);
-      console.log(
-        `  ▸ Latitude: ${lat.toFixed(6)}, Longitude: ${lng.toFixed(6)}`
-      );
-      sendAck(socket, "11", dateTime);
+      const data = parseGpsPacket(hexStr);
+      sendAck(socket, "11", data?.dateTime);
       break;
     }
     case "13": {
@@ -200,4 +172,25 @@ server.listen(PORT, HOST, () => {
 
 server.on("error", (err) => {
   console.error(`Server Error: ${err.message}`);
+});
+
+const HTTP_PORT = 3000;
+
+const httpServer = http.createServer((req, res) => {
+  if (req.method === "GET" && req.url === "/status") {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(
+      JSON.stringify({
+        status: "TCP server is running",
+        timestamp: new Date().toISOString(),
+      })
+    );
+  } else {
+    res.writeHead(404, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "Not found" }));
+  }
+});
+
+httpServer.listen(HTTP_PORT, () => {
+  console.log(`HTTP server listening on http://localhost:${HTTP_PORT}`);
 });
