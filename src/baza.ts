@@ -39,10 +39,30 @@ export const insertInDB = (data: any) => {
   const battery = 89;
   const time = new Date();
   const formattedTime = time.toISOString().slice(0, 19).replace("T", " ");
-  query(
-    `INSERT INTO transport (device_id, time, longi, lati, battery) VALUES (?, ?, ?, ?, ?)`,
-    [device_id, formattedTime, longitude, latitude, battery]
-  ).catch((err) => console.error("DB Insert Error:", err));
+
+  pool.getConnection((err, connection) => {
+    if (err) {
+      return err;
+    }
+    connection.query(
+      "INSERT INTO transport (device_id, time, longi, lati, battery) VALUES (?, ?, ?, ?, ?)",
+      [[device_id, formattedTime, longitude, latitude, battery]],
+      (err, res) => {
+        connection.release();
+        if (err) {
+          console.log("ERROR QUERY: ", query);
+          return err;
+        }
+        console.log("SUCCESS QUERY: ", query);
+        console.log(`QUERY TOOK: ${new Date().getTime() / 1000}s`);
+        return res;
+      }
+    );
+  });
+  // query(
+  //   `INSERT INTO transport (device_id, time, longi, lati, battery) VALUES (?, ?, ?, ?, ?)`,
+  //   [device_id, formattedTime, longitude, latitude, battery]
+  // ).catch((err) => console.error("DB Insert Error:", err));
 };
 
 // export const insertInDB = (data: any) => {
