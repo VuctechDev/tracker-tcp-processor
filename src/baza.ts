@@ -49,8 +49,7 @@ export const insertInDB = (data: any) => {
   const battery = data.speed;
   const time = new Date();
   query(
-    "INSERT INTO transport (device_id, time, longi, lati, battery) VALUES (?, ?, ?, ?, ?)",
-    [device_id, time, longitude, latitude, battery]
+    `INSERT INTO transport (device_id, time, longi, lati, battery) VALUES (${device_id}, ${time}, ${longitude}, ${latitude}, ${battery})`
   );
 };
 
