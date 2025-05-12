@@ -20,7 +20,7 @@ export const insertInDB = (data: any) => {
     const device_id = "0861261021070616";
     const latitude = data.latitude;
     const longitude = data.longitude;
-    const battery = 85;
+    const battery = data.speed;
     const time = new Date();
 
     const sql =
