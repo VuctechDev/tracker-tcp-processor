@@ -17,7 +17,11 @@ function sendAck(socket: net.Socket, protocolNumber: string, timeHex = "") {
     "hex"
   );
   socket.write(ack);
-  console.log(`>> [SENT] Ack sent for protocol ${protocolNumber}`);
+  console.log(
+    `>> [SENT] Ack sent for protocol ${protocolNumber}, ${
+      header + length + protocolNumber + timeHex + footer
+    }`
+  );
 }
 
 function getCurrentGMTTimeHex(): string {
@@ -87,10 +91,12 @@ function decodePacket(hexStr: string, socket: net.Socket) {
       const version = parseInt(hexStr.substring(10, 12), 16);
       const tz = parseInt(hexStr.substring(12, 14), 16);
       const interval = parseInt(hexStr.substring(14, 16), 16);
+      const nepoznato = parseInt(hexStr.substring(14, 16), 16);
       console.log(`[STATUS] Battery: ${battery}%`);
       console.log(`[STATUS] Version: ${version}`);
       console.log(`[STATUS] TZ: ${tz}`);
-      console.log(`[STATUS] Interval: ${interval}%`);
+      console.log(`[STATUS] Interval: ${interval}`);
+      console.log(`[STATUS] Unknown: ${nepoznato}`);
       sendAck(socket, "13");
       break;
     }
