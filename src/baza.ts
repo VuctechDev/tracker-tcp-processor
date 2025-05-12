@@ -40,25 +40,10 @@ export const insertInDB = (data: any) => {
   const time = new Date();
   const formattedTime = time.toISOString().slice(0, 19).replace("T", " ");
 
-  pool.getConnection((err, connection) => {
-    if (err) {
-      return err;
-    }
-    connection.query(
-      "INSERT INTO transport (device_id, time, longi, lati, battery) VALUES (?, ?, ?, ?, ?)",
-      [[device_id, formattedTime, longitude, latitude, battery]],
-      (err, res) => {
-        connection.release();
-        if (err) {
-          console.log("ERROR QUERY: ", query);
-          return err;
-        }
-        console.log("SUCCESS QUERY: ", query);
-        console.log(`QUERY TOOK: ${new Date().getTime() / 1000}s`);
-        return res;
-      }
-    );
-  });
+  query<{ insertId: number }>(
+    `INSERT INTO transport (device_id, time, longi, lati, battery) VALUES ?`,
+    [[device_id, time, longitude, latitude, battery]]
+  );
   // query(
   //   `INSERT INTO transport (device_id, time, longi, lati, battery) VALUES (?, ?, ?, ?, ?)`,
   //   [device_id, formattedTime, longitude, latitude, battery]
