@@ -12,7 +12,12 @@ interface GpsPacket {
 
 function decodeGpsCoordinate(hex: string): number {
   const intVal = parseInt(hex, 16);
-  return intVal / 30000;
+  const totalMinutes = intVal / 30000;
+
+  const degrees = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  return degrees + minutes / 60;
 }
 
 function convertHexDateTimeToUTC(hex: string): string {
