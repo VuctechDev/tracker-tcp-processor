@@ -11,7 +11,7 @@ function bufferToHex(buffer: Buffer) {
 function sendAck(socket: net.Socket, protocolNumber: string, timeHex = "") {
   const header = "7878";
   const length = "00";
-  const footer = "0d0a";
+  const footer = "0D0A";
   const ack = Buffer.from(
     header + length + protocolNumber + timeHex + footer,
     "hex"
@@ -112,7 +112,7 @@ function decodePacket(hexStr: string, socket: net.Socket) {
     case "30": {
       console.log("[TIME SYNC] Device requests time sync.");
       const currentTime = getCurrentGMTTimeHex();
-      const timeReply = Buffer.from("78780730" + currentTime + "0d0a", "hex");
+      const timeReply = Buffer.from("78780730" + currentTime + "0D0A", "hex");
       socket.write(timeReply);
       console.log(`[TIME SYNC] Time sync sent: ${currentTime}`);
       break;
