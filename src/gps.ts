@@ -11,14 +11,12 @@ interface GpsPacket {
 }
 
 function decodeGpsCoordinate(hex: string, isPositive: boolean): number {
-  console.log(`[GEO HEX]: ${hex}`);
   const raw = parseInt(hex, 16);
   const totalMinutes = raw / 30000;
   const degrees = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes - degrees * 60;
   const decimal = degrees + minutes / 60;
   const value = isPositive ? decimal : -decimal;
-  console.log(`[GEO VALUE]: ${value}`);
   return value;
 }
 
@@ -50,13 +48,18 @@ export function parseGpsPacket(hexStr: string): GpsPacket | null {
 
     const speed = parseInt(speedHex, 16);
 
-    const statusBin = parseInt(statusHex, 16).toString(2).padStart(16, "0");
-    // Example: "0011010011101100"
+    const status = parseInt(statusHex, 16);
 
-    const positioned = statusBin[5] === "1"; // bit 5: GPS fix
-    const east = statusBin[6] === "0"; // bit 6: 0 = East, 1 = West
-    const north = statusBin[7] === "1"; // bit 7: 1 = North, 0 = South
-    const heading = parseInt(statusBin.slice(8), 2); // last 8 bits = heading (0–359)
+    // Split into two bytes
+    const byte1 = (status >> 8) & 0xff; // first byte (status flags)
+    const byte2 = status & 0xff; // second byte (heading)
+
+    const positioned = (byte1 & 0x20) !== 0; // Bit 5: GPS fix
+    const east = (byte1 & 0x40) === 0; // Bit 6: 0 = East, 1 = West
+    const north = (byte1 & 0x80) !== 0; // Bit 7: 1 = North, 0 = South
+    const heading = byte2;
+    const gpsSatByte = hexStr.substring(20, 22); // e.g. "9C"
+    const satCount = parseInt(gpsSatByte, 16) & 0x0f; // mask lower nibble only
 
     const latitude = decodeGpsCoordinate(latHex, north);
     const longitude = decodeGpsCoordinate(lngHex, east);
@@ -75,6 +78,7 @@ export function parseGpsPacket(hexStr: string): GpsPacket | null {
         north ? "North" : "South"
       } latitude, ${east ? "East" : "West"} longitude`
     );
+    console.log(`[GPS] Visible Satellites: ${satCount}`);
 
     return {
       dateTime: dateTimeHex,
