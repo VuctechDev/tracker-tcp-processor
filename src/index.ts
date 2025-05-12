@@ -1,4 +1,5 @@
 import net from "net";
+import { parseStatusPacket } from "./status";
 
 // === CONFIGURATION SECTION ===
 const PORT = 5001;
@@ -87,16 +88,7 @@ function decodePacket(hexStr: string, socket: net.Socket) {
       break;
     }
     case "13": {
-      const battery = parseInt(hexStr.substring(8, 10), 16);
-      const version = parseInt(hexStr.substring(10, 12), 16);
-      const tz = parseInt(hexStr.substring(12, 14), 16);
-      const interval = parseInt(hexStr.substring(14, 16), 16);
-      const nepoznato = parseInt(hexStr.substring(14, 16), 16);
-      console.log(`[STATUS] Battery: ${battery}%`);
-      console.log(`[STATUS] Version: ${version}`);
-      console.log(`[STATUS] TZ: ${tz}`);
-      console.log(`[STATUS] Interval: ${interval}`);
-      console.log(`[STATUS] Unknown: ${nepoznato}`);
+      parseStatusPacket(hexStr);
       sendAck(socket, "13");
       break;
     }
