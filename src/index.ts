@@ -1,5 +1,6 @@
 import net from "net";
 import { parseStatusPacket } from "./status";
+import { parseGpsPacket } from "./gps";
 
 // === CONFIGURATION SECTION ===
 const PORT = 5001;
@@ -61,16 +62,17 @@ function decodePacket(hexStr: string, socket: net.Socket) {
       break;
 
     case "10": {
-      const dateTime = hexStr.substring(8, 20);
-      console.log(`[GPS] DateTime: ${dateTime}`);
-      const latHex = hexStr.substring(20, 28);
-      const lngHex = hexStr.substring(28, 36);
-      const lat = decodeGpsCoordinate(latHex);
-      const lng = decodeGpsCoordinate(lngHex);
-      console.log(
-        `  ▸ Latitude: ${lat.toFixed(6)}, Longitude: ${lng.toFixed(6)}`
-      );
-      sendAck(socket, "10", dateTime);
+      // const dateTime = hexStr.substring(8, 20);
+      // console.log(`[GPS] DateTime: ${dateTime}`);
+      // const latHex = hexStr.substring(20, 28);
+      // const lngHex = hexStr.substring(28, 36);
+      // const lat = decodeGpsCoordinate(latHex);
+      // const lng = decodeGpsCoordinate(lngHex);
+      // console.log(
+      //   `  ▸ Latitude: ${lat.toFixed(6)}, Longitude: ${lng.toFixed(6)}`
+      // );
+      const a = parseGpsPacket(hexStr);
+      sendAck(socket, "10", a?.dateTime);
       break;
     }
 
