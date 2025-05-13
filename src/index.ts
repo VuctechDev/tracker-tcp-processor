@@ -71,6 +71,7 @@ function decodePacket(hexStr: string, socket: net.Socket) {
 
     case "11": {
       const data = parseGpsPacket(hexStr);
+      insertInDB(data);
       sendAck(socket, "11", data?.dateTime);
       break;
     }
