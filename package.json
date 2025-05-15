@@ -7,19 +7,26 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "nodemon",
-    "push": "GIT_SSH_COMMAND='ssh -i /.ssh/id_rsa_vuctech' git push"
+    "docker": "docker compose up -d",
+    "gen": "npx prisma generate",
+    "mig": "npx prisma migrate dev --name init",
+    "push": "GIT_SSH_COMMAND='ssh -i ~/.ssh/id_rsa_vuctech' git push"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/express": "^5.0.1",
     "@types/mysql": "^2.15.27",
     "@types/node": "^22.15.17",
     "nodemon": "^3.1.10",
+    "prisma": "^6.7.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@prisma/client": "^6.7.0",
+    "express": "^5.1.0",
     "mysql": "^2.18.1",
     "net": "^1.0.2"
   }

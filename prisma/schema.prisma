@@ -1,0 +1,17 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model records {
+  id        Int      @id @default(autoincrement())
+  deviceId  String
+  long      Decimal  @db.Decimal(9, 6)
+  lat       Decimal  @db.Decimal(9, 6)
+  speed     Int
+  createdAt DateTime @default(now())
+}

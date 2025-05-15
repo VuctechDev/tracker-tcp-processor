@@ -1,12 +1,23 @@
 import net from "net";
 import { parseStatusPacket } from "./status";
 import { parseGpsPacket } from "./gps";
-import http from "http";
 import { insertInDB } from "./baza";
+import express from "express";
+import prisma from "./prizma";
+import { setInterval } from "timers";
+import { insert } from "./prizma/records";
 
 // === CONFIGURATION SECTION ===
-const PORT = 5001;
+const HTTP_PORT = 2302;
+const TCP_PORT = 5001;
 const HOST = "0.0.0.0";
+
+const app = express();
+
+app.get("/status", async (req, res) => {
+  const count = await prisma.records.count(); // Example DB query
+  res.json({ message: "Server is up", records: count });
+});
 
 function bufferToHex(buffer: Buffer) {
   return buffer.toString("hex").toUpperCase();
@@ -169,8 +180,11 @@ const server = net.createServer((socket) => {
   });
 });
 
-server.listen(PORT, HOST, () => {
-  console.log(`Server listening on ${HOST}:${PORT}`);
+server.listen(TCP_PORT, HOST, () => {
+  console.log(`TCP listening on ${HOST}:${TCP_PORT}`);
+});
+app.listen(HTTP_PORT, () => {
+  console.log(`HTTP server running at http://localhost:${HTTP_PORT}`);
 });
 
 server.on("error", (err) => {
