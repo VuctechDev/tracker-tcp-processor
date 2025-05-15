@@ -1,4 +1,4 @@
-interface GpsPacket {
+export interface GpsPacket {
   dateTime: string; // Original hex
   dateTimeUTC: string; // ISO string
   latitude: number;
@@ -36,7 +36,8 @@ export function parseGpsPacket(hexStr: string): GpsPacket | null {
   try {
     if (!hexStr.startsWith("7878")) throw new Error("Invalid start bits");
     const protocol = hexStr.substring(6, 8);
-    if (protocol !== "10" && protocol !== "11") throw new Error("Not a GPS packet");
+    if (protocol !== "10" && protocol !== "11")
+      throw new Error("Not a GPS packet");
 
     const dateTimeHex = hexStr.substring(8, 20); // "19050C121210"
     const dateTimeUTC = convertHexDateTimeToUTC(dateTimeHex);

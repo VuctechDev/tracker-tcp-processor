@@ -1,14 +1,15 @@
 import { Prisma } from "@prisma/client";
 import prisma from ".";
+import { GpsPacket } from "../gps";
 
-export const insert = async () => {
+export const insert = async (data: GpsPacket) => {
   await prisma.records.create({
     data: {
-      deviceId: "12345AASS",
-      lat: new Prisma.Decimal(`${Math.random() * 100}`),
-      long: new Prisma.Decimal(`${Math.random() * 100}`),
-      speed: 45,
-      createdAt: new Date("2025-05-13 23:33:46.771"),
+      deviceId: "0861261021070616",
+      lat: new Prisma.Decimal(`${data?.latitude}`),
+      long: new Prisma.Decimal(`${data?.longitude}`),
+      speed: data?.speed,
+      createdAt: data?.dateTimeUTC ? new Date(data?.dateTimeUTC) : undefined,
     },
   });
 };
