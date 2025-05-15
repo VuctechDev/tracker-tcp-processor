@@ -1,5 +1,5 @@
+import { Prisma } from "@prisma/client";
 import prisma from ".";
-import { Prisma } from "../generated/prisma";
 
 export const insert = async () => {
   await prisma.records.create({
