@@ -15,8 +15,18 @@ const HOST = "0.0.0.0";
 const app = express();
 
 app.get("/status", async (req, res) => {
-  const count = await prisma.records.count(); // Example DB query
+  const count = await prisma.records.count();
   res.json({ message: "Server is up", records: count });
+});
+
+app.get("/data", async (req, res) => {
+  const data = await prisma.records.findMany({
+    take: 200,
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+  res.json({ data });
 });
 
 function bufferToHex(buffer: Buffer) {
