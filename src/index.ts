@@ -65,6 +65,8 @@ function decodeGpsCoordinate(coordHex: string): number {
   return raw / 1800000;
 }
 
+const deviceSockets = new Map<string, net.Socket>();
+
 function decodePacket(hexStr: string, socket: net.Socket) {
   const protocol = hexStr.substring(6, 8);
   console.log(`[INFO] Protocol: ${protocol}`);
@@ -76,11 +78,14 @@ function decodePacket(hexStr: string, socket: net.Socket) {
         .map((b) => parseInt(b, 16).toString(16).padStart(2, "0"))
         .join("");
       console.log(`[LOGIN] IMEI: ${imei}`);
+      (socket as any).imei = imei;
+      deviceSockets.set(imei, socket);
       sendAck(socket, "01");
       break;
     }
     case "08":
       console.log("[HEARTBEAT] Heartbeat packet received.");
+      console.log("[IMEI] 8 ", (socket as any).imei);
       sendAck(socket, "08");
       break;
     case "10": {
@@ -100,6 +105,7 @@ function decodePacket(hexStr: string, socket: net.Socket) {
       break;
     }
     case "13": {
+      console.log("[IMEI] 13 ", (socket as any).imei);
       parseStatusPacket(hexStr);
       sendAck(socket, "13");
       break;
@@ -166,7 +172,6 @@ function decodePacket(hexStr: string, socket: net.Socket) {
   }
 }
 
-// === Create TCP Server ===
 const server = net.createServer((socket) => {
   console.log(
     `Client connected from ${socket.remoteAddress}:${socket.remotePort}`
@@ -177,7 +182,8 @@ const server = net.createServer((socket) => {
     console.log(`[RECEIVED] ${hexStr}`);
 
     if (data.length < 5 || data[0] !== 0x78 || data[1] !== 0x78) {
-      console.log("Invalid or non-GPS packet. Ignored.");
+      console.log("Invalid connection. Destroyed.");
+      socket.destroy();
       return;
     }
 
@@ -185,7 +191,11 @@ const server = net.createServer((socket) => {
   });
 
   socket.on("close", () => {
-    console.log(`Client disconnected: ${socket.remoteAddress}`);
+    const imei = (socket as any).imei;
+    if (imei) {
+      deviceSockets.delete(imei);
+    }
+    console.log(`Client disconnected: ${socket.remoteAddress} - ${imei}`);
   });
 
   socket.on("error", (err) => {
