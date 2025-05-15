@@ -1,6 +1,9 @@
+import net from "net";
+
 export interface GpsPacket {
-  dateTime: string; // Original hex
-  dateTimeUTC: string; // ISO string
+  deviceId: string;
+  dateTime: string;
+  dateTimeUTC: string;
   latitude: number;
   longitude: number;
   speed: number;
@@ -29,23 +32,26 @@ function convertHexDateTimeToUTC(hex: string): string {
   const second = parseInt(hex.substring(10, 12), 16);
 
   const date = new Date(Date.UTC(year, month - 1, day, hour, minute, second));
-  return date.toISOString(); // Format: YYYY-MM-DDTHH:mm:ss.sssZ
+  return date.toISOString();
 }
 
-export function parseGpsPacket(hexStr: string): GpsPacket | null {
+export function parseGpsPacket(
+  hexStr: string,
+  socket: net.Socket
+): GpsPacket | null {
   try {
     if (!hexStr.startsWith("7878")) throw new Error("Invalid start bits");
     const protocol = hexStr.substring(6, 8);
     if (protocol !== "10" && protocol !== "11")
       throw new Error("Not a GPS packet");
 
-    const dateTimeHex = hexStr.substring(8, 20); // "19050C121210"
+    const dateTimeHex = hexStr.substring(8, 20);
     const dateTimeUTC = convertHexDateTimeToUTC(dateTimeHex);
 
-    const latHex = hexStr.substring(22, 30); // "04CC2B73"
-    const lngHex = hexStr.substring(30, 38); // "01D781FC"
-    const speedHex = hexStr.substring(38, 40); // "00"
-    const statusHex = hexStr.substring(40, 44); // "34EC"
+    const latHex = hexStr.substring(22, 30);
+    const lngHex = hexStr.substring(30, 38);
+    const speedHex = hexStr.substring(38, 40);
+    const statusHex = hexStr.substring(40, 44);
 
     const speed = parseInt(speedHex, 16);
 
@@ -66,7 +72,6 @@ export function parseGpsPacket(hexStr: string): GpsPacket | null {
     const latitude = decodeGpsCoordinate(latHex, north);
     const longitude = decodeGpsCoordinate(lngHex, east);
 
-    // ✅ Logging
     console.log(`[INFO] Protocol: ${protocol}`);
     console.log(`[GPS] DateTime: ${dateTimeHex}`);
     console.log(`[GPS] UTC Time: ${dateTimeUTC}`);
@@ -83,6 +88,7 @@ export function parseGpsPacket(hexStr: string): GpsPacket | null {
     console.log(`[GPS] Visible Satellites: ${satCount}`);
 
     return {
+      deviceId: (socket as any).imei,
       dateTime: dateTimeHex,
       dateTimeUTC,
       latitude,

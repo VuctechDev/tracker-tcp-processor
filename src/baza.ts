@@ -1,4 +1,5 @@
 import mySql from "mysql";
+import { GpsPacket } from "./decoders/gps";
 
 const pool = mySql.createPool({
   host: "sv95.ifastnet.com",
@@ -32,46 +33,16 @@ export const query = <T>(
   });
 };
 
-export const insertInDB = (data: any) => {
-  const device_id = "0861261021070616";
-  const latitude = data.latitude?.toFixed(5);
-  const longitude = data.longitude?.toFixed(5);
+export const insertInDB = (data: GpsPacket) => {
+  const device_id = data.deviceId;
+  const latitude = data.latitude?.toFixed(6);
+  const longitude = data.longitude?.toFixed(6);
   const battery = data.speed;
   const time = new Date();
   const formattedTime = time.toISOString().slice(0, 19).replace("T", " ");
 
   query<{ insertId: number }>(
     `INSERT INTO transport (device_id, time, longi, lati, battery) VALUES ?`,
-    [[device_id, time, longitude, latitude, battery]]
+    [[device_id, `${time}`, longitude, latitude, battery]]
   );
 };
-
-// export const insertInDB = (data: any) => {
-//   connection.connect((err) => {
-//     if (err) {
-//       console.error("Greška pri konekciji:", err);
-//       return;
-//     }
-//     console.log("Konekcija sa bazom uspješna.");
-
-//     const device_id = "0861261021070616";
-//     const latitude = data.latitude;
-//     const longitude = data.longitude;
-//     const battery = 86;
-//     const time = new Date();
-
-//     const sql =
-//       "INSERT INTO transport (device_id, time, longi, lati, battery) VALUES (?, ?, ?, ?, ?)";
-//     const values = [device_id, time, longitude, latitude, battery];
-
-//     connection.query(sql, values, (err, result) => {
-//       if (err) {
-//         console.error("Greška pri upisu u bazu:", err);
-//       } else {
-//         console.log("Uspješno upisano, ID:", result.insertId);
-//       }
-
-//       connection.end();
-//     });
-//   });
-// };

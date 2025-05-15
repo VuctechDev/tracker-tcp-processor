@@ -10,8 +10,20 @@ datasource db {
 model records {
   id        Int      @id @default(autoincrement())
   deviceId  String
+  device    devices  @relation(fields: [deviceId], references: [imei])
   long      Decimal  @db.Decimal(9, 6)
   lat       Decimal  @db.Decimal(9, 6)
   speed     Int
+  createdAt DateTime @default(now())
+}
+
+model devices {
+  id        Int      @id @default(autoincrement())
+  imei      String   @unique
+  code      String   @unique
+  battery   Int
+  signal    Int
+  version   Int
+  status    String
   createdAt DateTime @default(now())
 }

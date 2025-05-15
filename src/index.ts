@@ -1,11 +1,12 @@
 import net from "net";
-import { parseStatusPacket } from "./status";
-import { parseGpsPacket } from "./gps";
+import { parseStatusPacket } from "./decoders/status";
+import { parseGpsPacket } from "./decoders/gps";
 import { insertInDB } from "./baza";
 import express from "express";
+import cors from "cors";
 import prisma from "./prizma";
-import { setInterval } from "timers";
 import { insert } from "./prizma/records";
+import { parseConnectionPacket } from "./decoders/connect";
 
 // === CONFIGURATION SECTION ===
 const HTTP_PORT = 2302;
@@ -13,6 +14,12 @@ const TCP_PORT = 5555;
 const HOST = "0.0.0.0";
 
 const app = express();
+
+app.use(
+  cors({
+    origin: "*", // or "*" for all
+  })
+);
 
 app.get("/status", async (req, res) => {
   const count = await prisma.records.count();
@@ -73,24 +80,18 @@ function decodePacket(hexStr: string, socket: net.Socket) {
 
   switch (protocol) {
     case "01": {
-      const imeiBytes = hexStr.substring(8, 24).match(/.{1,2}/g) || [];
-      const imei = imeiBytes
-        .map((b) => parseInt(b, 16).toString(16).padStart(2, "0"))
-        .join("");
-      console.log(`[LOGIN] IMEI: ${imei}`);
-      (socket as any).imei = imei;
-      deviceSockets.set(imei, socket);
+      parseConnectionPacket(hexStr, socket);
       sendAck(socket, "01");
       break;
     }
     case "08":
       console.log("[HEARTBEAT] Heartbeat packet received.");
-      console.log("[IMEI] 8 ", (socket as any).imei);
+      console.log("[IMEI] ", (socket as any).imei);
       sendAck(socket, "08");
       break;
     case "10": {
-      const data = parseGpsPacket(hexStr);
-      if (data) {
+      const data = parseGpsPacket(hexStr, socket);
+      if (data && data.deviceId) {
         insertInDB(data);
         insert(data);
       }
@@ -99,13 +100,16 @@ function decodePacket(hexStr: string, socket: net.Socket) {
     }
 
     case "11": {
-      const data = parseGpsPacket(hexStr);
-      insertInDB(data);
+      const data = parseGpsPacket(hexStr, socket);
+      if (data && data.deviceId) {
+        insertInDB(data);
+        // insert(data);
+      }
       sendAck(socket, "11", data?.dateTime);
       break;
     }
     case "13": {
-      console.log("[IMEI] 13 ", (socket as any).imei);
+      console.log("[IMEI] ", (socket as any).imei);
       parseStatusPacket(hexStr);
       sendAck(socket, "13");
       break;
