@@ -9,7 +9,7 @@ import { insert } from "./prizma/records";
 
 // === CONFIGURATION SECTION ===
 const HTTP_PORT = 2302;
-const TCP_PORT = 5001;
+const TCP_PORT = 5555;
 const HOST = "0.0.0.0";
 
 const app = express();
