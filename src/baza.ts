@@ -34,7 +34,7 @@ export const query = <T>(
 };
 
 export const insertInDB = (data: GpsPacket) => {
-  const device_id = data.deviceId;
+  const device_id = data.imei;
   const latitude = data.latitude?.toFixed(6);
   const longitude = data.longitude?.toFixed(6);
   const battery = data.speed;

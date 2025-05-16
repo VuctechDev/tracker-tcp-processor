@@ -3,8 +3,8 @@ import { parseStatusPacket } from "./decoders/status";
 import { parseGpsPacket } from "./decoders/gps";
 import express from "express";
 import cors from "cors";
-import prisma from "./prizma";
-import { insert } from "./prizma/records";
+import prisma from "./db/prizma";
+import db from "./db";
 import { parseConnectionPacket } from "./decoders/connect";
 
 const HTTP_PORT = 2302;
@@ -25,12 +25,12 @@ app.get("/status", async (req, res) => {
 });
 
 app.get("/data", async (req, res) => {
-  const data = await prisma.records.findMany({
-    take: 200,
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+  const data = await db.records.get();
+  res.json({ data });
+});
+
+app.get("/devices", async (req, res) => {
+  const data = await db.devices.get();
   res.json({ data });
 });
 
@@ -72,19 +72,25 @@ function decodeGpsCoordinate(coordHex: string): number {
 
 const deviceSockets = new Map<string, net.Socket>();
 
-function decodePacket(hexStr: string, socket: net.Socket) {
+async function decodePacket(hexStr: string, socket: net.Socket) {
   const protocol = hexStr.substring(6, 8);
   console.log(`[INFO] Protocol: ${protocol}`);
 
   switch (protocol) {
     case "01": {
-      parseConnectionPacket(hexStr, socket);
+      const imei = parseConnectionPacket(hexStr, socket);
+      if (imei) {
+        const exists = await db.devices.getByIMEI(imei);
+        if (!exists) {
+          db.devices.create(imei);
+        }
+      }
       sendAck(socket, "01");
       break;
     }
     case "08":
       console.log("[HEARTBEAT] Heartbeat packet received.");
-      console.log("[IMEI] ", (socket as any).imei);
+      db.devices.updateStatus((socket as any).imei, "static");
       sendAck(socket, "08");
       break;
     // case "10": {
@@ -98,15 +104,18 @@ function decodePacket(hexStr: string, socket: net.Socket) {
     case "10":
     case "11": {
       const data = parseGpsPacket(hexStr, socket);
-      if (data && data.deviceId) {
-        insert(data);
+      if (data && data.imei) {
+        db.records.insert(data);
+        db.devices.updateStatus(data.imei, "dynamic");
       }
       sendAck(socket, protocol, data?.dateTime);
       break;
     }
     case "13": {
-      console.log("[IMEI] ", (socket as any).imei);
-      parseStatusPacket(hexStr);
+      const data = parseStatusPacket(hexStr, socket);
+      if (data && data.imei) {
+        db.devices.update(data);
+      }
       sendAck(socket, "13");
       break;
     }
@@ -130,6 +139,7 @@ function decodePacket(hexStr: string, socket: net.Socket) {
 
     case "80": {
       console.log(`[KEEPALIVE] Protocol 0x80 keep-alive received.`);
+      db.devices.updateStatus((socket as any).imei, "static");
       sendAck(socket, "80");
       break;
     }

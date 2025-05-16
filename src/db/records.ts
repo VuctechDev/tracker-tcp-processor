@@ -1,13 +1,13 @@
-import prisma from ".";
+import prisma from "./prizma";
 import { insertInDB } from "../baza";
 import { GpsPacket } from "../decoders/gps";
 import { Decimal } from "decimal.js";
 
-export const insert = async (data: GpsPacket) => {
+const insert = async (data: GpsPacket) => {
   insertInDB(data);
   await prisma.records.create({
     data: {
-      deviceId: data.deviceId,
+      deviceId: data.imei,
       lat: new Decimal(`${data?.latitude}`),
       long: new Decimal(`${data?.longitude}`),
       speed: data?.speed,
@@ -15,6 +15,17 @@ export const insert = async (data: GpsPacket) => {
     },
   });
 };
+
+const get = async () => {
+  return await prisma.records.findMany({
+    take: 200,
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+};
+
+export { get, insert };
 // [RECEIVED] 787815111905101108289F04CC35BA01D7793B2734A300AC000D0A
 // 2025-05-16T17:08:55.416717013Z [INFO] Protocol: 11/10
 // 2025-05-16T17:08:55.417159613Z [INFO] Protocol: 11/10

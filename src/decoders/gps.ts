@@ -1,7 +1,7 @@
 import net from "net";
 
 export interface GpsPacket {
-  deviceId: string;
+  imei: string;
   dateTime: string;
   dateTimeUTC: string;
   latitude: number;
@@ -88,7 +88,7 @@ export function parseGpsPacket(
     console.log(`[GPS] Visible Satellites: ${satCount}`);
 
     return {
-      deviceId: (socket as any).imei,
+      imei: (socket as any).imei,
       dateTime: dateTimeHex,
       dateTimeUTC,
       latitude,
