@@ -1,14 +1,12 @@
 import net from "net";
 import { parseStatusPacket } from "./decoders/status";
 import { parseGpsPacket } from "./decoders/gps";
-import { insertInDB } from "./baza";
 import express from "express";
 import cors from "cors";
 import prisma from "./prizma";
 import { insert } from "./prizma/records";
 import { parseConnectionPacket } from "./decoders/connect";
 
-// === CONFIGURATION SECTION ===
 const HTTP_PORT = 2302;
 const TCP_PORT = 5555;
 const HOST = "0.0.0.0";
@@ -17,7 +15,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: "*", // or "*" for all
+    origin: "*",
   })
 );
 
@@ -89,22 +87,21 @@ function decodePacket(hexStr: string, socket: net.Socket) {
       console.log("[IMEI] ", (socket as any).imei);
       sendAck(socket, "08");
       break;
-    case "10": {
+    // case "10": {
+    //   const data = parseGpsPacket(hexStr, socket);
+    //   if (data && data.deviceId) {
+    //     insert(data);
+    //   }
+    //   sendAck(socket, protocol, data?.dateTime);
+    //   break;
+    // }
+    case "10":
+    case "11": {
       const data = parseGpsPacket(hexStr, socket);
       if (data && data.deviceId) {
         insert(data);
       }
-      sendAck(socket, "10", data?.dateTime);
-      break;
-    }
-
-    case "11": {
-      const data = parseGpsPacket(hexStr, socket);
-      if (data && data.deviceId) {
-        insertInDB(data);
-        // insert(data);
-      }
-      sendAck(socket, "11", data?.dateTime);
+      sendAck(socket, protocol, data?.dateTime);
       break;
     }
     case "13": {

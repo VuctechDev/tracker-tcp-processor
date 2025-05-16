@@ -38,7 +38,7 @@ export const insertInDB = (data: GpsPacket) => {
   const latitude = data.latitude?.toFixed(6);
   const longitude = data.longitude?.toFixed(6);
   const battery = data.speed;
-  const time = new Date();
+  const time = data?.dateTimeUTC ? new Date(data?.dateTimeUTC) : new Date();
   const formattedTime = time.toISOString().slice(0, 19).replace("T", " ");
 
   query<{ insertId: number }>(
