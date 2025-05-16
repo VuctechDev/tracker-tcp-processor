@@ -34,6 +34,7 @@ const create = async (imei: string) => {
       status: "static",
     },
   });
+  console.log(`[NEW DEVICE] Created ${imei}`);
 };
 
 const update = async (data: StatusPacket) => {
