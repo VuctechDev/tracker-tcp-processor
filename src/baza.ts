@@ -43,6 +43,6 @@ export const insertInDB = (data: GpsPacket) => {
 
   query<{ insertId: number }>(
     `INSERT INTO transport (device_id, time, longi, lati, battery) VALUES ?`,
-    [[device_id, `${time}`, longitude, latitude, battery]]
+    [[device_id, formattedTime, longitude, latitude, battery]]
   );
 };

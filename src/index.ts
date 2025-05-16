@@ -92,7 +92,6 @@ function decodePacket(hexStr: string, socket: net.Socket) {
     case "10": {
       const data = parseGpsPacket(hexStr, socket);
       if (data && data.deviceId) {
-        insertInDB(data);
         insert(data);
       }
       sendAck(socket, "10", data?.dateTime);
