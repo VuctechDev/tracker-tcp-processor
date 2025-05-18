@@ -169,6 +169,24 @@ async function decodePacket(hexStr: string, socket: net.Socket) {
       // sendAck(socket, "80");
       break;
     }
+    case "1A": {
+      console.log(`[1A] Protocol 0x1A received.`);
+      const timeBytes = hexStr.substring(4, 10); // 6 bytes
+      if (timeBytes.length !== 6) {
+        console.error("Invalid time length in 0x1A packet");
+        return;
+      }
+
+      // Construct response: 7878 00 [protocol] [time bytes] 0D0A
+
+      const ack = Buffer.from("7878" + "00" + "1A" + timeBytes + "0D0A", "hex");
+
+      socket.write(ack);
+      console.log(
+        `>> [SENT] Ack for 0x1A: ${ack.toString("hex").toUpperCase()}`
+      );
+      break;
+    }
 
     case "1B": {
       const timestamp = hexStr.substring(8, 20);
