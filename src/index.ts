@@ -6,6 +6,7 @@ import cors from "cors";
 import prisma from "./db/prizma";
 import db from "./db";
 import { parseConnectionPacket } from "./decoders/connect";
+import { updateDeviceInterval } from "./commands";
 
 const HTTP_PORT = 2302;
 const TCP_PORT = 5555;
@@ -18,6 +19,7 @@ app.use(
     origin: "*",
   })
 );
+app.use(express.json());
 
 app.get("/status", async (req, res) => {
   const count = await prisma.records.count();
@@ -35,11 +37,21 @@ app.get("/devices", async (req, res) => {
   res.json({ data });
 });
 
+app.patch("/devices/interval/:id", async (req, res) => {
+  console.log(req.params, req.body);
+  updateDeviceInterval(req.params.id, req.body.value, req.body.code);
+  res.json({ data: 1 });
+});
+
 function bufferToHex(buffer: Buffer) {
   return buffer.toString("hex").toUpperCase();
 }
 
-function sendAck(socket: net.Socket, protocolNumber: string, timeHex = "") {
+export function sendAck(
+  socket: net.Socket,
+  protocolNumber: string,
+  timeHex = ""
+) {
   const header = "7878";
   const length = "00";
   const footer = "0D0A";
@@ -72,6 +84,8 @@ function decodeGpsCoordinate(coordHex: string): number {
 }
 
 const deviceSockets = new Map<string, net.Socket>();
+
+export const getSocket = (imei: string) => deviceSockets.get(imei);
 
 async function decodePacket(hexStr: string, socket: net.Socket) {
   const protocol = hexStr.substring(6, 8);
@@ -142,6 +156,12 @@ async function decodePacket(hexStr: string, socket: net.Socket) {
       console.log(`[KEEPALIVE] Protocol 0x80 keep-alive received.`);
       db.devices.updateStatus((socket as any).imei, "static");
       sendAck(socket, "80");
+      break;
+    }
+    case "97": {
+      console.log(`[INTERVAL CHANGE] Protocol 0x97 received.`);
+      // db.devices.updateStatus((socket as any).imei, "static");
+      // sendAck(socket, "80");
       break;
     }
 
