@@ -61,9 +61,12 @@ export const restartDevice = (imei: string) => {
     console.warn(`Socket not found for device ${imei}`);
     return;
   }
-  const softReset = Buffer.from("78780248010D0A", "hex");
+  const ack = "78780248010D0A";
+  const softReset = Buffer.from(ack, "hex");
   socket.write(softReset);
-  console.log(">> [SENT] Soft reset command (restart - 0x48) - " + imei);
+  console.log(
+    `>> [SENT] Soft reset command (restart - 0x48) - IMEI: ${imei}, CODE: ${ack}`
+  );
 };
 
 export const turnAlarmOn = (imei: string, value: string) => {
@@ -72,7 +75,10 @@ export const turnAlarmOn = (imei: string, value: string) => {
     console.warn(`Socket not found for device ${imei}`);
     return;
   }
-  const softReset = Buffer.from(`78780249${value}0D0A`, "hex");
+  const ack = `78780249${value}0D0A`;
+  const softReset = Buffer.from(ack, "hex");
   socket.write(softReset);
-  console.log(">> [SENT] Sound ON/OFF (restart - 0x49) - " + imei);
+  console.log(
+    `>> [SENT] Sound ON/OFF (restart - 0x49) - IMEI: ${imei}, CODE: ${ack}`
+  );
 };
