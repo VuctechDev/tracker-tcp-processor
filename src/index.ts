@@ -215,7 +215,7 @@ const server = net.createServer((socket) => {
 
   socket.on("data", (data) => {
     const hexStr = bufferToHex(data);
-    console.log(`[RECEIVED] ${hexStr}`);
+    console.log(`[RECEIVED] ${hexStr} - IMEI: ${(socket as any).imei}`);
 
     if (data.length < 5 || data[0] !== 0x78 || data[1] !== 0x78) {
       console.log("Invalid connection. Destroyed.");
