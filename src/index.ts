@@ -54,9 +54,10 @@ app.patch("/devices/command/:id", async (req, res) => {
     getLocation(req.params.id, req.body.value, req.body.code);
   } else if (req.body?.code === "48") {
     restartDevice(req.params.id);
-  } else if (req.body?.code === "49") {
-    turnAlarmOn(req.params.id, req.body.value);
-  }
+  } 
+  // else if (req.body?.code === "49") {
+  //   turnAlarmOn(req.params.id, req.body.value);
+  // }
   res.json({ data: 1 });
 });
 
