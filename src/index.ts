@@ -171,15 +171,16 @@ async function decodePacket(hexStr: string, socket: net.Socket) {
     }
     case "1A": {
       console.log(`[1A] Protocol 0x1A received.`);
-      const timeBytes = hexStr.substring(4, 10); // 6 bytes
-      if (timeBytes.length !== 6) {
+
+      // Extract 6 bytes (12 chars) starting after protocol byte
+      const timeHex = hexStr.substring(8, 20); // 6 bytes = 12 hex chars
+
+      if (timeHex.length !== 12) {
         console.error("Invalid time length in 0x1A packet");
         return;
       }
 
-      // Construct response: 7878 00 [protocol] [time bytes] 0D0A
-
-      const ack = Buffer.from("7878" + "00" + "1A" + timeBytes + "0D0A", "hex");
+      const ack = Buffer.from("7878001A" + timeHex + "0D0A", "hex");
 
       socket.write(ack);
       console.log(
