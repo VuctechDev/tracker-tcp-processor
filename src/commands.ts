@@ -65,3 +65,14 @@ export const restartDevice = (imei: string) => {
   socket.write(softReset);
   console.log(">> [SENT] Soft reset command (restart - 0x48) - " + imei);
 };
+
+export const turnAlarmOn = (imei: string, value: string) => {
+  const socket = devices.get(imei);
+  if (!socket) {
+    console.warn(`Socket not found for device ${imei}`);
+    return;
+  }
+  const softReset = Buffer.from(`78780249${value}0D0A`, "hex");
+  socket.write(softReset);
+  console.log(">> [SENT] Sound ON/OFF (restart - 0x49) - " + imei);
+};

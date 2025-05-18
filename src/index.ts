@@ -6,7 +6,12 @@ import cors from "cors";
 import prisma from "./db/prizma";
 import db from "./db";
 import { parseConnectionPacket } from "./decoders/connect";
-import { getLocation, restartDevice, updateDeviceInterval } from "./commands";
+import {
+  getLocation,
+  restartDevice,
+  turnAlarmOn,
+  updateDeviceInterval,
+} from "./commands";
 
 const HTTP_PORT = 2302;
 const TCP_PORT = 5555;
@@ -49,6 +54,8 @@ app.patch("/devices/command/:id", async (req, res) => {
     getLocation(req.params.id, req.body.value, req.body.code);
   } else if (req.body?.code === "48") {
     restartDevice(req.params.id);
+  } else if (req.body?.code === "49") {
+    turnAlarmOn(req.params.id, req.body.value);
   }
   res.json({ data: 1 });
 });
