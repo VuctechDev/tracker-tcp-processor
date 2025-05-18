@@ -3,8 +3,8 @@ import net from "net";
 
 export function sendCommand(
   socket: net.Socket,
-  protocol: string, // e.g. "97"
-  payloadHex: string = "" // full hex payload like "0014"
+  protocol: string,
+  payloadHex: string = ""
 ) {
   const header = "7878";
   const footer = "0D0A";
@@ -16,8 +16,9 @@ export function sendCommand(
 
   const hexString = header + length + protocol + payloadHex + footer;
   const buffer = Buffer.from(hexString, "hex");
+  console.log(hexString);
 
-  socket.write(buffer);
+  //   socket.write(buffer);
 
   console.log(
     `>> [SENT] Command sent: ${hexString.toUpperCase()} (Protocol: ${protocol})`
@@ -27,7 +28,7 @@ export function sendCommand(
 export const updateDeviceInterval = (
   imei: string,
   value: string,
-  protocol: string // protocol code like "97"
+  protocol: string
 ) => {
   const socket = devices.get(imei);
   if (!socket) {
@@ -41,7 +42,15 @@ export const updateDeviceInterval = (
     return;
   }
 
-  const payloadHex = intValue.toString(16).padStart(4, "0"); // 2 bytes = 4 hex chars
-  console.error(payloadHex);
+  const payloadHex = intValue.toString(16).padStart(4, "0");
   sendCommand(socket, protocol, payloadHex);
+};
+
+export const getLocation = (imei: string, value: string, protocol: string) => {
+  const socket = devices.get(imei);
+  if (!socket) {
+    console.warn(`Socket not found for device ${imei}`);
+    return;
+  }
+  sendCommand(socket, protocol, value);
 };
