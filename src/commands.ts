@@ -54,3 +54,14 @@ export const getLocation = (imei: string, value: string, protocol: string) => {
   }
   sendCommand(socket, protocol, value);
 };
+
+export const restartDevice = (imei: string) => {
+  const socket = devices.get(imei);
+  if (!socket) {
+    console.warn(`Socket not found for device ${imei}`);
+    return;
+  }
+  const softReset = Buffer.from("78780248010D0A", "hex");
+  socket.write(softReset);
+  console.log(">> [SENT] Soft reset command (restart - 0x48) - " + imei);
+};
