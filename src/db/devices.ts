@@ -3,12 +3,14 @@ import { generateCode } from "../utils/generateCode";
 import { StatusPacket } from "../decoders/status";
 
 interface DeviceType {
+  id: number;
   imei: string;
   code: string;
   battery: number;
   signal: number;
   version: number;
   status: "static" | "dynamic";
+  createdAt: string;
 }
 
 const get = async () => {

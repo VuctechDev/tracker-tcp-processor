@@ -25,7 +25,17 @@ const get = async () => {
   });
 };
 
-export { get, insert };
+const getByIMEI = async (imei: string) => {
+  return await prisma.records.findMany({
+    take: 200,
+    where: { deviceId: imei },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+};
+
+export { get, getByIMEI, insert };
 // [RECEIVED] 787815111905101108289F04CC35BA01D7793B2734A300AC000D0A
 // 2025-05-16T17:08:55.416717013Z [INFO] Protocol: 11/10
 // 2025-05-16T17:08:55.417159613Z [INFO] Protocol: 11/10

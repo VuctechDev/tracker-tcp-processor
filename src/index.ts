@@ -24,8 +24,9 @@ app.get("/status", async (req, res) => {
   res.json({ message: "Server is up", records: count });
 });
 
-app.get("/data", async (req, res) => {
-  const data = await db.records.get();
+app.get("/data/:imei", async (req, res) => {
+  const { imei } = req.params;
+  const data = await db.records.getByIMEI(imei);
   res.json({ data });
 });
 
