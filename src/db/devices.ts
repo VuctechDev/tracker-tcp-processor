@@ -34,6 +34,8 @@ const create = async (imei: string) => {
       signal: 0,
       version: 1,
       status: "static",
+      interval: "60",
+      name: "",
     },
   });
   console.log(`[NEW DEVICE] Created ${imei}`);
@@ -50,11 +52,35 @@ const update = async (data: StatusPacket) => {
   });
 };
 
-const updateStatus = async (imei: string, status: "static" | "dynamic") => {
+const updateStatus = async (
+  imei: string,
+  status: "static" | "dynamic" | "offline"
+) => {
   await prisma.devices.update({
     where: { imei },
     data: { status: status ?? "static" },
   });
 };
 
-export { get, getByIMEI, create, update, updateStatus };
+const setAllOffline = async () => {
+  await prisma.devices.updateMany({
+    data: { status: "offline" },
+  });
+};
+
+const updateInterval = async (imei: string, interval: string) => {
+  await prisma.devices.update({
+    where: { imei },
+    data: { interval: interval ?? "60" },
+  });
+};
+
+export {
+  get,
+  getByIMEI,
+  create,
+  update,
+  updateStatus,
+  updateInterval,
+  setAllOffline,
+};

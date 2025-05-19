@@ -24,5 +24,7 @@ model devices {
   signal    Int
   version   Int
   status    String
+  name      String
+  interval  String
   createdAt DateTime @default(now())
 }

@@ -9,9 +9,11 @@ import { parseConnectionPacket } from "./decoders/connect";
 import {
   getLocation,
   restartDevice,
-  turnAlarmOn,
+  turnAlarmOnOff,
   updateDeviceInterval,
 } from "./commands";
+import { devices } from "./devices";
+import { getCurrentGMTTimeHex } from "./utils/getCurrentGMTTimeHex";
 
 const HTTP_PORT = 2302;
 const TCP_PORT = 5555;
@@ -42,22 +44,28 @@ app.get("/devices", async (req, res) => {
   res.json({ data });
 });
 
-app.patch("/devices/interval/:id", async (req, res) => {
-  console.log(req.params, req.body);
-  updateDeviceInterval(req.params.id, req.body.value, req.body.code);
-  res.json({ data: 1 });
-});
-
 app.patch("/devices/command/:id", async (req, res) => {
-  console.log(req.params, req.body);
-  if (req.body?.code === "80") {
-    getLocation(req.params.id, req.body.value, req.body.code);
-  } else if (req.body?.code === "48") {
-    restartDevice(req.params.id);
-  } 
-  // else if (req.body?.code === "49") {
-  //   turnAlarmOn(req.params.id, req.body.value);
+  const imei = req.params.id;
+  const protocol = req.body?.code;
+  const value = req.body?.value;
+  const socket = devices.get(imei);
+  if (!socket) {
+    console.warn(`Socket not found for device ${imei}`);
+    res.json({ data: 1 });
+    return;
+  }
+  let ack = "";
+  if (protocol === "48") {
+    ack = restartDevice(socket);
+  } else if (protocol === "80") {
+    ack = getLocation(socket);
+  } else if (protocol === "97") {
+    ack = updateDeviceInterval(socket, value, imei);
+  }
+  // else if (protocol === "49") {
+  // ack = turnAlarmOnOff(socket, value);
   // }
+  console.log(`[SENT] 0x${req.body.code} - IMEI: ${imei}, CODE: ${ack}`);
   res.json({ data: 1 });
 });
 
@@ -83,17 +91,6 @@ export function sendAck(
       header + length + protocolNumber + timeHex + footer
     }`
   );
-}
-
-function getCurrentGMTTimeHex(): string {
-  const now = new Date();
-  const year = (now.getUTCFullYear() % 100).toString(16).padStart(2, "0");
-  const month = (now.getUTCMonth() + 1).toString(16).padStart(2, "0");
-  const day = now.getUTCDate().toString(16).padStart(2, "0");
-  const hour = now.getUTCHours().toString(16).padStart(2, "0");
-  const minute = now.getUTCMinutes().toString(16).padStart(2, "0");
-  const second = now.getUTCSeconds().toString(16).padStart(2, "0");
-  return year + month + day + hour + minute + second;
 }
 
 function decodeGpsCoordinate(coordHex: string): number {
@@ -262,6 +259,7 @@ const server = net.createServer((socket) => {
     const imei = (socket as any).imei;
     if (imei) {
       deviceSockets.delete(imei);
+      db.devices.updateStatus(imei, "offline");
     }
     console.log(`Client disconnected: ${socket.remoteAddress} - ${imei}`);
   });
@@ -275,6 +273,7 @@ server.listen(TCP_PORT, HOST, () => {
   console.log(`TCP listening on ${HOST}:${TCP_PORT}`);
 });
 app.listen(HTTP_PORT, () => {
+  db.devices.setAllOffline();
   console.log(`HTTP server running at http://localhost:${HTTP_PORT}`);
 });
 
