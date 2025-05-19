@@ -145,6 +145,7 @@ async function decodePacket(hexStr: string, socket: net.Socket) {
       const data = parseStatusPacket(hexStr, socket);
       if (data && data.imei) {
         db.devices.update(data);
+        db.devices.updateStatus(data.imei, "static");
       }
       sendAck(socket, "13");
       break;
