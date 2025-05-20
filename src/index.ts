@@ -14,6 +14,7 @@ import {
 } from "./commands";
 import { devices } from "./devices";
 import { getCurrentGMTTimeHex } from "./utils/getCurrentGMTTimeHex";
+import { handleProtocol1B } from "./decoders/handleProtocol1B";
 
 const HTTP_PORT = 2302;
 const TCP_PORT = 5555;
@@ -180,54 +181,12 @@ async function decodePacket(hexStr: string, socket: net.Socket) {
       // sendAck(socket, "80");
       break;
     }
-    case "1A": {
-      console.log(`[1A] Protocol 0x1A received.`);
 
-      // Extract 6 bytes (12 chars) starting after protocol byte
-      const timeHex = hexStr.substring(8, 20); // 6 bytes = 12 hex chars
-
-      if (timeHex.length !== 12) {
-        console.error("Invalid time length in 0x1A packet");
-        return;
-      }
-
-      const ack = Buffer.from("7878001A" + timeHex + "0D0A", "hex");
-
-      socket.write(ack);
-      console.log(
-        `>> [SENT] Ack for 0x1A: ${ack.toString("hex").toUpperCase()}`
-      );
-      break;
-    }
-
+    case "18":
+    case "19":
+    case "1A":
     case "1B": {
-      const timestamp = hexStr.substring(8, 20);
-      const gpsInfoByte = parseInt(hexStr.substring(20, 22), 16);
-      const gpsFix = (gpsInfoByte & 0xf0) >> 4;
-      const satellites = gpsInfoByte & 0x0f;
-
-      const mcc = hexStr.substring(22, 26);
-      const mnc = hexStr.substring(26, 28);
-      const lac = hexStr.substring(28, 32);
-      const cellId = hexStr.substring(32, 40);
-
-      const latHex = hexStr.substring(40, 48);
-      const lngHex = hexStr.substring(48, 56);
-      const lat = decodeGpsCoordinate(latHex);
-      const lng = decodeGpsCoordinate(lngHex);
-
-      console.log(`[LBS+GPS] Time: ${timestamp}`);
-      console.log(`  ▸ MCC: ${mcc}`);
-      console.log(`  ▸ MNC: ${mnc}`);
-      console.log(`  ▸ LAC: ${lac}`);
-      console.log(`  ▸ Cell ID: ${cellId}`);
-      console.log(`  ▸ GPS Fix: ${gpsFix === 0 ? "No fix" : `${gpsFix}D fix`}`);
-      console.log(`  ▸ Satellites: ${satellites}`);
-      console.log(
-        `  ▸ Latitude: ${lat.toFixed(6)}, Longitude: ${lng.toFixed(6)}`
-      );
-
-      sendAck(socket, "1B", timestamp);
+      handleProtocol1B(socket, hexStr);
       break;
     }
 
