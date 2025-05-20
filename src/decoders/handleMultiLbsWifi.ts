@@ -58,8 +58,9 @@ export function handleMultiLbsWifi(
 
   const wifiCount = parseInt(hexStr.substring(18, 20), 16);
   const wifiStart = 20;
+  const wifiDataLen = wifiCount * 14;
   const wifiData = parseWifi(hexStr, wifiCount, wifiStart);
-  const lbsStart = wifiStart + wifiCount * 14;
+  const lbsStart = wifiStart + wifiDataLen;
 
   if (hexStr.length < lbsStart + 8) {
     console.warn(
