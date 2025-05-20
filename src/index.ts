@@ -14,7 +14,7 @@ import {
 } from "./commands";
 import { devices } from "./devices";
 import { getCurrentGMTTimeHex } from "./utils/getCurrentGMTTimeHex";
-import { handleProtocol1B } from "./decoders/handleProtocol1B";
+import { handleMultiLbsWifi } from "./decoders/handleMultiLbsWifi";
 
 const HTTP_PORT = 2302;
 const TCP_PORT = 5555;
@@ -186,7 +186,7 @@ async function decodePacket(hexStr: string, socket: net.Socket) {
     case "19":
     case "1A":
     case "1B": {
-      handleProtocol1B(socket, hexStr);
+      handleMultiLbsWifi(socket, hexStr, protocol);
       break;
     }
 
