@@ -18,7 +18,7 @@ function parseLBS(hexStr: string, count: number, offset: number) {
   const towers = [];
   for (let i = 0; i < count; i++) {
     const base = offset + i * 18;
-    if (base + 18 > hexStr.length) break; // bounds check
+    if (base + 18 > hexStr.length) break;
     const lacHex = hexStr.substring(base, base + 8);
     const cellHex = hexStr.substring(base + 8, base + 16);
     const rssiHex = hexStr.substring(base + 16, base + 18);
@@ -46,16 +46,20 @@ export function handleMultiLbsWifi(
   hexStr: string,
   protocol: string
 ) {
-  const wifiCount = parseInt(hexStr.substring(4, 6), 16);
   const timestamp = hexStr.substring(6, 18);
   const tsParts = timestamp.match(/.{2}/g);
-  const readableTimestamp = tsParts
-    ? `20${tsParts[0]}-${tsParts[1]}-${tsParts[2]} ${tsParts[3]}:${tsParts[4]}:${tsParts[5]}`
-    : `Invalid timestamp (${timestamp})`;
+  const year = parseInt(tsParts?.[0] || "00", 16);
+  const readableTimestamp =
+    tsParts?.length === 6
+      ? `20${year.toString().padStart(2, "0")}-${tsParts[1]}-${tsParts[2]} ${
+          tsParts[3]
+        }:${tsParts[4]}:${tsParts[5]}`
+      : `Invalid timestamp (${timestamp})`;
 
-  const wifiOffset = 18;
-  const wifiData = parseWifi(hexStr, wifiCount, wifiOffset);
-  const lbsStart = wifiOffset + wifiCount * 14;
+  const wifiCount = parseInt(hexStr.substring(18, 20), 16);
+  const wifiStart = 20;
+  const wifiData = parseWifi(hexStr, wifiCount, wifiStart);
+  const lbsStart = wifiStart + wifiCount * 14;
 
   if (hexStr.length < lbsStart + 8) {
     console.warn(
@@ -66,10 +70,8 @@ export function handleMultiLbsWifi(
   }
 
   const lbsCount = parseInt(hexStr.substring(lbsStart, lbsStart + 2), 16);
-  const mccHex = hexStr.substring(lbsStart + 2, lbsStart + 6);
-  const mncHex = hexStr.substring(lbsStart + 6, lbsStart + 8);
-  const mcc = parseInt(mccHex, 16);
-  const mnc = parseInt(mncHex, 16);
+  const mcc = parseInt(hexStr.substring(lbsStart + 2, lbsStart + 6), 16);
+  const mnc = parseInt(hexStr.substring(lbsStart + 6, lbsStart + 8), 16);
 
   const lbsTowerStart = lbsStart + 8;
   const expectedLbsDataLen = lbsCount * 18;
