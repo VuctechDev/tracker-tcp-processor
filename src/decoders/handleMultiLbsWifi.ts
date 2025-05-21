@@ -54,7 +54,7 @@ export function handleMultiLbsWifi(
   hexStr: string,
   protocol: string
 ) {
-  const timestamp = hexStr.substring(6, 18);
+  const timestamp = hexStr.substring(8, 20);
   const tsParts = timestamp.match(/.{2}/g);
   const year = parseInt(tsParts?.[0] || "00", 16);
   const readableTimestamp =
