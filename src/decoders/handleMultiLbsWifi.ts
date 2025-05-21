@@ -1,5 +1,5 @@
 import net from "net";
-// import { addLog } from "../index2";
+import { addLog } from "../index";
 
 function parseWifi(hexStr: string, count: number, offset: number) {
   const wifiList = [];
@@ -41,7 +41,7 @@ function sendAck(
   const ack = `787800${protocol}${bcdTimestamp}0D0A`;
   const buffer = Buffer.from(ack, "hex");
   socket.write(buffer);
-  // addLog({ imei: (socket as any).imei, protocol, received: hexStr, ack });
+  addLog({ imei: (socket as any).imei, protocol, received: hexStr, ack });
   console.log(
     `>> [SENT] Ack sent for protocol ${protocol}, ${buffer
       .toString("hex")

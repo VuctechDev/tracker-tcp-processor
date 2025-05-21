@@ -74,9 +74,9 @@ app.patch("/devices/command/:id", async (req, res) => {
 
 const bufferToHex = (buffer: Buffer) => buffer.toString("hex").toUpperCase();
 
-// export const addLog = (data: LogCreateType) => {
-//   db.logs.insert(data);
-// };
+export const addLog = (data: LogCreateType) => {
+  db.logs.insert(data);
+};
 
 export function sendAck(
   socket: net.Socket,
@@ -91,8 +91,8 @@ export function sendAck(
   if (protocol === "01") {
     ack = header + "0101" + footer;
   }
-  // addLog({ imei: (socket as any).imei, protocol, received: hexStr, ack });
-  const buffer = Buffer.from(ack, 'hex');
+  addLog({ imei: (socket as any).imei, protocol, received: hexStr, ack });
+  const buffer = Buffer.from(ack, "hex");
   socket.write(buffer, () => {
     console.log(
       `>> [SENT] Ack sent for protocol ${protocol}, ${buffer.toString("hex")}`
@@ -162,9 +162,9 @@ async function decodePacket(hexStr: string, socket: net.Socket) {
       console.log("[TIME SYNC] Device requests time sync.");
       const currentTime = getCurrentGMTTimeHex();
       const ack = "78780730" + currentTime + "0D0A";
-      const timeReply = Buffer.from(ack);
+      const timeReply = Buffer.from(ack, "hex");
       socket.write(timeReply);
-      // addLog({ imei: (socket as any).imei, protocol, received: hexStr, ack });
+      addLog({ imei: (socket as any).imei, protocol, received: hexStr, ack });
       console.log(`[TIME SYNC] Time sync sent: ${currentTime}`);
       break;
     }
@@ -177,12 +177,12 @@ async function decodePacket(hexStr: string, socket: net.Socket) {
     }
     case "97": {
       console.log(`[INTERVAL CHANGE] Protocol 0x97 received.`);
-      // addLog({
-      //   imei: (socket as any).imei,
-      //   protocol,
-      //   received: hexStr,
-      //   ack: "",
-      // });
+      addLog({
+        imei: (socket as any).imei,
+        protocol,
+        received: hexStr,
+        ack: "",
+      });
       break;
     }
 
@@ -198,12 +198,12 @@ async function decodePacket(hexStr: string, socket: net.Socket) {
       console.log(
         `[UNKNOWN] Protocol ${protocol} received. Raw data: ${hexStr}`
       );
-    // addLog({
-    //   imei: (socket as any).imei,
-    //   protocol,
-    //   received: hexStr,
-    //   ack: "NOT REPLIED",
-    // });
+      addLog({
+        imei: (socket as any).imei,
+        protocol,
+        received: hexStr,
+        ack: "NOT REPLIED",
+      });
   }
 }
 
