@@ -90,6 +90,8 @@ export function sendAck(
   let ack = header + length + protocol + timeHex + footer;
   if (protocol === "01") {
     ack = header + "0101" + footer;
+  } else if (protocol === "13") {
+    ack = hexStr;
   }
   addLog({ imei: (socket as any).imei, protocol, received: hexStr, ack });
   const buffer = Buffer.from(ack, "hex");
