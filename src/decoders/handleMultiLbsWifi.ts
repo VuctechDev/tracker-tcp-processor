@@ -38,7 +38,7 @@ function sendAck(
   bcdTimestamp: string,
   hexStr: string
 ) {
-  const ack = `787800${protocol}${bcdTimestamp}0D0A`;
+  const ack = `787800${protocol}${bcdTimestamp}0d0a`;
   const buffer = Buffer.from(ack, "hex");
   socket.write(buffer);
   addLog({ imei: (socket as any).imei, protocol, received: hexStr, ack });

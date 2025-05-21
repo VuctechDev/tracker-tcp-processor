@@ -163,7 +163,7 @@ async function decodePacket(hexStr: string, socket: net.Socket) {
     case "30": {
       console.log("[TIME SYNC] Device requests time sync.");
       const currentTime = getCurrentGMTTimeHex();
-      const ack = "78780730" + currentTime + "0D0A";
+      const ack = "78780730" + currentTime + "0d0a";
       const timeReply = Buffer.from(ack, "hex");
       socket.write(timeReply);
       addLog({ imei: (socket as any).imei, protocol, received: hexStr, ack });
