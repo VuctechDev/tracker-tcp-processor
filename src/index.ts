@@ -92,6 +92,8 @@ export function sendAck(
     ack = header + "0101" + footer;
   } else if (protocol === "13") {
     ack = hexStr;
+  } else if (protocol === "57") {
+    ack = `78781F57003C010000000000000000000000000000000000000000000000003B3B3B0D0A`;
   }
   addLog({ imei: (socket as any).imei, protocol, received: hexStr, ack });
   const buffer = Buffer.from(ack, "hex");
@@ -185,6 +187,10 @@ async function decodePacket(hexStr: string, socket: net.Socket) {
         received: hexStr,
         ack: "",
       });
+      break;
+    }
+    case "57": {
+      sendAck(socket, "57", hexStr);
       break;
     }
 
