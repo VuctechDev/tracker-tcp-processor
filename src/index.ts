@@ -94,7 +94,10 @@ export function sendAck(
   const header = "7878";
   const length = "00";
   const footer = "0D0A";
-  const ack = header + length + protocol + timeHex + footer;
+  let ack = header + length + protocol + timeHex + footer;
+  if (protocol === "01") {
+    ack = header + "0101" + footer;
+  }
 
   const buffer = Buffer.from(ack);
   socket.write(buffer);
@@ -128,7 +131,7 @@ async function decodePacket(hexStr: string, socket: net.Socket) {
           db.devices.create(imei);
         }
       }
-      sendAck(socket, "01", hexStr);
+      sendAck(socket, "01", hexStr, "01");
       break;
     }
     case "08":
