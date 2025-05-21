@@ -28,3 +28,12 @@ model devices {
   interval  String   @default("60")
   createdAt DateTime @default(now())
 }
+
+model logs {
+  id        Int      @id @default(autoincrement())
+  imei      String 
+  protocol  String
+  received  String
+  ack       String
+  createdAt DateTime @default(now())
+}
