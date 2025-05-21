@@ -245,9 +245,16 @@ app.listen(HTTP_PORT, () => {
 });
 
 app.get("/status", async (req, res) => {
+  const a = await server.getConnections((error, count) => {
+    if (!error) {
+      console.log("OPA: ", count);
+      return new Promise((resolve) => resolve(count));
+    }
+  });
   res.json({
     message: "Server is up",
     count: server.connections,
+    count2: a,
     x: JSON.stringify(server),
   });
 });
