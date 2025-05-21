@@ -1,4 +1,5 @@
 import net from "net";
+import { addLog } from "..";
 
 function parseWifi(hexStr: string, count: number, offset: number) {
   const wifiList = [];
@@ -31,11 +32,18 @@ function parseLBS(hexStr: string, count: number, offset: number) {
   return towers;
 }
 
-function sendAck(socket: net.Socket, protocol: string, bcdTimestamp: string) {
-  const ack = Buffer.from(`787800${protocol}${bcdTimestamp}0D0A`, "hex");
-  socket.write(ack);
+function sendAck(
+  socket: net.Socket,
+  protocol: string,
+  bcdTimestamp: string,
+  hexStr: string
+) {
+  const ack = `787800${protocol}${bcdTimestamp}0D0A`;
+  const buffer = Buffer.from(ack, "hex");
+  socket.write(buffer);
+  addLog({ imei: (socket as any).imei, protocol, received: hexStr, ack });
   console.log(
-    `>> [SENT] Ack sent for protocol ${protocol}, ${ack
+    `>> [SENT] Ack sent for protocol ${protocol}, ${buffer
       .toString("hex")
       .toUpperCase()}`
   );
@@ -66,7 +74,7 @@ export function handleMultiLbsWifi(
     console.warn(
       `[0x${protocol}] Packet too short to contain valid LBS headers.`
     );
-    sendAck(socket, protocol, timestamp);
+    sendAck(socket, protocol, timestamp, hexStr);
     return;
   }
 
@@ -102,5 +110,5 @@ export function handleMultiLbsWifi(
   });
   console.log(`  • Alarm Byte: 0x${alarmByte}`);
 
-  sendAck(socket, protocol, timestamp);
+  sendAck(socket, protocol, timestamp, hexStr);
 }

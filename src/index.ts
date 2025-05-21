@@ -15,6 +15,7 @@ import {
 import { devices } from "./devices";
 import { getCurrentGMTTimeHex } from "./utils/getCurrentGMTTimeHex";
 import { handleMultiLbsWifi } from "./decoders/handleMultiLbsWifi";
+import { LogCreateType } from "./db/logs";
 
 const HTTP_PORT = 2302;
 const TCP_PORT = 5555;
@@ -37,6 +38,12 @@ app.get("/status", async (req, res) => {
 app.get("/data/:imei", async (req, res) => {
   const { imei } = req.params;
   const data = await db.records.getByIMEI(imei);
+  res.json({ data });
+});
+
+app.get("/logs/:imei", async (req, res) => {
+  const { imei } = req.params;
+  const data = await db.logs.getByIMEI(imei);
   res.json({ data });
 });
 
@@ -74,22 +81,27 @@ function bufferToHex(buffer: Buffer) {
   return buffer.toString("hex").toUpperCase();
 }
 
+export const addLog = (data: LogCreateType) => {
+  db.logs.insert(data);
+};
+
 export function sendAck(
   socket: net.Socket,
-  protocolNumber: string,
+  protocol: string,
+  hexStr: string,
   timeHex = ""
 ) {
   const header = "7878";
   const length = "00";
   const footer = "0D0A";
-  const ack = Buffer.from(
-    header + length + protocolNumber + timeHex + footer,
-    "hex"
-  );
-  socket.write(ack);
+  const ack = header + length + protocol + timeHex + footer;
+
+  const buffer = Buffer.from(ack);
+  socket.write(buffer);
+  addLog({ imei: (socket as any).imei, protocol, received: hexStr, ack });
   console.log(
-    `>> [SENT] Ack sent for protocol ${protocolNumber}, ${
-      header + length + protocolNumber + timeHex + footer
+    `>> [SENT] Ack sent for protocol ${protocol}, ${
+      header + length + protocol + timeHex + footer
     }`
   );
 }
@@ -116,22 +128,14 @@ async function decodePacket(hexStr: string, socket: net.Socket) {
           db.devices.create(imei);
         }
       }
-      sendAck(socket, "01");
+      sendAck(socket, "01", hexStr);
       break;
     }
     case "08":
       console.log("[HEARTBEAT] Heartbeat packet received.");
       db.devices.updateStatus((socket as any).imei, "static");
-      sendAck(socket, "08");
+      sendAck(socket, "08", hexStr);
       break;
-    // case "10": {
-    //   const data = parseGpsPacket(hexStr, socket);
-    //   if (data && data.deviceId) {
-    //     insert(data);
-    //   }
-    //   sendAck(socket, protocol, data?.dateTime);
-    //   break;
-    // }
     case "10":
     case "11": {
       const data = parseGpsPacket(hexStr, socket);
@@ -139,7 +143,7 @@ async function decodePacket(hexStr: string, socket: net.Socket) {
         db.records.insert(data);
         db.devices.updateStatus(data.imei, "dynamic");
       }
-      sendAck(socket, protocol, data?.dateTime);
+      sendAck(socket, protocol, hexStr, data?.dateTime);
       break;
     }
     case "13": {
@@ -148,7 +152,7 @@ async function decodePacket(hexStr: string, socket: net.Socket) {
         db.devices.update(data);
         db.devices.updateStatus(data.imei, "static");
       }
-      sendAck(socket, "13");
+      sendAck(socket, "13", hexStr);
       break;
     }
 
@@ -156,15 +160,17 @@ async function decodePacket(hexStr: string, socket: net.Socket) {
     case "69": {
       const time = hexStr.substring(10, 22);
       console.log(`[WIFI LBS] DateTime: ${time}`);
-      sendAck(socket, protocol, time);
+      sendAck(socket, protocol, hexStr, time);
       break;
     }
 
     case "30": {
       console.log("[TIME SYNC] Device requests time sync.");
       const currentTime = getCurrentGMTTimeHex();
-      const timeReply = Buffer.from("78780730" + currentTime + "0D0A", "hex");
+      const ack = "78780730" + currentTime + "0D0A";
+      const timeReply = Buffer.from(ack);
       socket.write(timeReply);
+      addLog({ imei: (socket as any).imei, protocol, received: hexStr, ack });
       console.log(`[TIME SYNC] Time sync sent: ${currentTime}`);
       break;
     }
@@ -172,13 +178,17 @@ async function decodePacket(hexStr: string, socket: net.Socket) {
     case "80": {
       console.log(`[KEEPALIVE] Protocol 0x80 keep-alive received.`);
       db.devices.updateStatus((socket as any).imei, "static");
-      sendAck(socket, "80");
+      sendAck(socket, "80", hexStr);
       break;
     }
     case "97": {
       console.log(`[INTERVAL CHANGE] Protocol 0x97 received.`);
-      // db.devices.updateStatus((socket as any).imei, "static");
-      // sendAck(socket, "80");
+      addLog({
+        imei: (socket as any).imei,
+        protocol,
+        received: hexStr,
+        ack: "",
+      });
       break;
     }
 
@@ -194,6 +204,12 @@ async function decodePacket(hexStr: string, socket: net.Socket) {
       console.log(
         `[UNKNOWN] Protocol ${protocol} received. Raw data: ${hexStr}`
       );
+      addLog({
+        imei: (socket as any).imei,
+        protocol,
+        received: hexStr,
+        ack: "NOT REPLIED",
+      });
   }
 }
 
