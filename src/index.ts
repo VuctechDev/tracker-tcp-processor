@@ -30,11 +30,6 @@ app.use(
 );
 app.use(express.json());
 
-app.get("/status", async (req, res) => {
-  const count = await prisma.records.count();
-  res.json({ message: "Server is up", records: count });
-});
-
 app.get("/data/:imei", async (req, res) => {
   const { imei } = req.params;
   const data = await db.records.getByIMEI(imei);
@@ -77,9 +72,7 @@ app.patch("/devices/command/:id", async (req, res) => {
   res.json({ data: 1 });
 });
 
-function bufferToHex(buffer: Buffer) {
-  return buffer.toString("hex").toUpperCase();
-}
+const bufferToHex = (buffer: Buffer) => buffer.toString("hex").toUpperCase();
 
 export const addLog = (data: LogCreateType) => {
   db.logs.insert(data);
@@ -249,6 +242,14 @@ server.listen(TCP_PORT, HOST, () => {
 app.listen(HTTP_PORT, () => {
   db.devices.setAllOffline();
   console.log(`HTTP server running at http://localhost:${HTTP_PORT}`);
+});
+
+app.get("/status", async (req, res) => {
+  res.json({
+    message: "Server is up",
+    count: server.connections,
+    x: JSON.stringify(server),
+  });
 });
 
 server.on("error", (err) => {
