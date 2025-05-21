@@ -95,18 +95,14 @@ export function sendAck(
   const length = "00";
   const footer = "0D0A";
   let ack = header + length + protocol + timeHex + footer;
-  if (protocol === "01") {
-    ack = header + "0101" + footer;
-  }
+  // if (protocol === "01") {
+  //   ack = header + "0101" + footer;
+  // }
 
   const buffer = Buffer.from(ack);
   socket.write(buffer);
   addLog({ imei: (socket as any).imei, protocol, received: hexStr, ack });
-  console.log(
-    `>> [SENT] Ack sent for protocol ${protocol}, ${
-      header + length + protocol + timeHex + footer
-    }`
-  );
+  console.log(`>> [SENT] Ack sent for protocol ${protocol}, ${ack}`);
 }
 
 function decodeGpsCoordinate(coordHex: string): number {
