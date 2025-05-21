@@ -127,7 +127,7 @@ async function decodePacket(hexStr: string, socket: net.Socket) {
           db.devices.create(imei);
         }
       }
-      sendAck(socket, "01", hexStr, "01");
+      sendAck(socket, "01", hexStr);
       break;
     }
     case "08":
