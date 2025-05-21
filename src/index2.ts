@@ -86,7 +86,7 @@ export function sendAck(
 ) {
   const header = "7878";
   const length = "00";
-  const footer = "0D0A";
+  const footer = "0d0a";
   let ack = header + length + protocol + timeHex + footer;
   if (protocol === "01") {
     ack = header + "0101" + footer;
