@@ -92,7 +92,7 @@ export function sendAck(
     ack = header + "0101" + footer;
   }
   // addLog({ imei: (socket as any).imei, protocol, received: hexStr, ack });
-  const buffer = Buffer.from(ack);
+  const buffer = Buffer.from(ack, 'hex');
   socket.write(buffer, () => {
     console.log(
       `>> [SENT] Ack sent for protocol ${protocol}, ${buffer.toString("hex")}`
@@ -198,12 +198,12 @@ async function decodePacket(hexStr: string, socket: net.Socket) {
       console.log(
         `[UNKNOWN] Protocol ${protocol} received. Raw data: ${hexStr}`
       );
-      // addLog({
-      //   imei: (socket as any).imei,
-      //   protocol,
-      //   received: hexStr,
-      //   ack: "NOT REPLIED",
-      // });
+    // addLog({
+    //   imei: (socket as any).imei,
+    //   protocol,
+    //   received: hexStr,
+    //   ack: "NOT REPLIED",
+    // });
   }
 }
 
@@ -248,18 +248,16 @@ app.listen(HTTP_PORT, () => {
 });
 
 app.get("/status", async (req, res) => {
-  app.get("/listeners", (req, res) => {
-    const eventNames = server.eventNames();
-    const listeners = eventNames.reduce((acc: any, event) => {
-      acc[event] = server.listeners(event).length;
-      return acc;
-    }, {} as Record<string, number>);
+  const eventNames = server.eventNames();
+  const listeners = eventNames.reduce((acc: any, event) => {
+    acc[event] = server.listeners(event).length;
+    return acc;
+  }, {} as Record<string, number>);
 
-    res.json({
-      message: "Registered listeners on TCP server",
-      events: eventNames,
-      listenerCounts: listeners,
-    });
+  res.json({
+    message: "Registered listeners on TCP server",
+    events: eventNames,
+    listenerCounts: listeners,
   });
 });
 
