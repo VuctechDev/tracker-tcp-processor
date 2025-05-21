@@ -93,8 +93,11 @@ export function sendAck(
   }
   addLog({ imei: (socket as any).imei, protocol, received: hexStr, ack });
   const buffer = Buffer.from(ack);
-  socket.write(buffer);
-  console.log(`>> [SENT] Ack sent for protocol ${protocol}, ${ack}`);
+  socket.write(buffer, () => {
+    console.log(
+      `>> [SENT] Ack sent for protocol ${protocol}, ${buffer.toString("hex")}`
+    );
+  });
 }
 
 function decodeGpsCoordinate(coordHex: string): number {
