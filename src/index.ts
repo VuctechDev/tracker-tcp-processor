@@ -93,7 +93,7 @@ export function sendAck(
   } else if (protocol === "13") {
     ack = hexStr;
   } else if (protocol === "57") {
-    ack = `78781F57003C010000000000000000000000000000000000000000000000003B3B3B0D0A`;
+    ack = `78781F570258010000000000000000000000000000000000000000000000003B3B3B0D0A`;
   }
   addLog({ imei: (socket as any).imei, protocol, received: hexStr, ack });
   const buffer = Buffer.from(ack, "hex");
