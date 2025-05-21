@@ -10,7 +10,7 @@ server.on("connection", (socket: any) => {
 
   socket.on("data", (data: any) => {
     const hex = data.toString("hex");
-    console.log(`[RECEIVED] ${hex}`);
+    console.log(`[RECEIVED] ${hex}, protocol: ${hex.substr(6, 2)}`);
 
     // Provjera da li je login paket (0x01)
     if (hex.startsWith("7878") && hex.substr(6, 2) === "01") {
