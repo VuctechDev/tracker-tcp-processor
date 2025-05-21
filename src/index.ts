@@ -98,10 +98,9 @@ export function sendAck(
   // if (protocol === "01") {
   //   ack = header + "0101" + footer;
   // }
-
+  addLog({ imei: (socket as any).imei, protocol, received: hexStr, ack });
   const buffer = Buffer.from(ack);
   socket.write(buffer);
-  addLog({ imei: (socket as any).imei, protocol, received: hexStr, ack });
   console.log(`>> [SENT] Ack sent for protocol ${protocol}, ${ack}`);
 }
 
