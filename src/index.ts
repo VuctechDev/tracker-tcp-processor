@@ -189,10 +189,10 @@ async function decodePacket(hexStr: string, socket: net.Socket) {
       });
       break;
     }
-    case "57": {
-      sendAck(socket, "57", hexStr);
-      break;
-    }
+    // case "57": {
+    //   sendAck(socket, "57", hexStr);
+    //   break;
+    // }
 
     case "18":
     case "19":

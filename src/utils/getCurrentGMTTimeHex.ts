@@ -1,10 +1,21 @@
 export function getCurrentGMTTimeHex(): string {
   const now = new Date();
-  const year = (now.getUTCFullYear() % 100).toString(16).padStart(2, "0");
-  const month = (now.getUTCMonth() + 1).toString(16).padStart(2, "0");
-  const day = now.getUTCDate().toString(16).padStart(2, "0");
-  const hour = now.getUTCHours().toString(16).padStart(2, "0");
-  const minute = now.getUTCMinutes().toString(16).padStart(2, "0");
-  const second = now.getUTCSeconds().toString(16).padStart(2, "0");
-  return year + month + day + hour + minute + second;
+
+  const year = now.getUTCFullYear() % 100; // e.g. 2025 → 25
+  const month = now.getUTCMonth() + 1; // getUTCMonth is zero-based
+  const day = now.getUTCDate();
+  const hour = now.getUTCHours();
+  const minute = now.getUTCMinutes();
+  const second = now.getUTCSeconds();
+
+  const toHex = (val: number) => val.toString(16).padStart(2, "0");
+
+  return (
+    toHex(year) +
+    toHex(month) +
+    toHex(day) +
+    toHex(hour) +
+    toHex(minute) +
+    toHex(second)
+  );
 }
