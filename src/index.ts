@@ -166,8 +166,12 @@ async function decodePacket(hexStr: string, socket: net.Socket) {
       console.log("[TIME SYNC] Device requests time sync.");
       const currentTime = getCurrentGMTTimeHex();
       const ack = "78780730" + currentTime + "0d0a";
+      const ack1 = "787807301905160704370d0a";
+      const ack2 = "787807302505220704370d0a";
       const timeReply = Buffer.from(ack, "hex");
+      console.log("Buffer 30: ", timeReply);
       socket.write(timeReply);
+
       addLog({ imei: (socket as any).imei, protocol, received: hexStr, ack });
       console.log(`[TIME SYNC] Time sync sent: ${currentTime}`);
       break;
