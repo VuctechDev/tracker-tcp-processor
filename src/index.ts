@@ -166,8 +166,8 @@ async function decodePacket(hexStr: string, socket: net.Socket) {
       console.log("[TIME SYNC] Device requests time sync.");
       const currentTime = getCurrentGMTTimeHex();
       const ack = "78780730" + currentTime + "0d0a";
-      const ack1 = "787807301905160704370d0a";
-      const ack2 = "787807302505220704370d0a";
+      // const ack1 = "787807301905160704370d0a";
+      // const ack2 = "787807302505220704370d0a";
       const timeReply = Buffer.from(ack, "hex");
       console.log("Buffer 30: ", timeReply);
       socket.write(timeReply);
@@ -180,7 +180,14 @@ async function decodePacket(hexStr: string, socket: net.Socket) {
     case "80": {
       console.log(`[KEEPALIVE] Protocol 0x80 keep-alive received.`);
       db.devices.updateStatus((socket as any).imei, "static");
-      sendAck(socket, "80", hexStr);
+      addLog({
+        imei: (socket as any).imei,
+        protocol,
+        received: hexStr,
+        ack: "",
+      });
+
+      // sendAck(socket, "80", hexStr);
       break;
     }
     case "97": {

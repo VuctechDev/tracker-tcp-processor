@@ -8,7 +8,7 @@ export function getCurrentGMTTimeHex(): string {
   const minute = now.getUTCMinutes();
   const second = now.getUTCSeconds();
 
-  const toHex = (val: number) => val.toString().padStart(2, "0");
+  const toHex = (val: number) => val.toString(16).padStart(2, "0");
 
   return (
     toHex(year) +
