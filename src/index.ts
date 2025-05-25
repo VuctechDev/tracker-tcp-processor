@@ -106,13 +106,15 @@ export function sendAck(
   });
   if (ack2) {
     const buffer2 = Buffer.from(ack2, "hex");
-    socket.write(buffer, () => {
-      console.log(
-        `>> [SENT] Ack sent for protocol ${protocol}, ${buffer2.toString(
-          "hex"
-        )}`
-      );
-    });
+    setTimeout(() => {
+      socket.write(buffer, () => {
+        console.log(
+          `>> [SENT] Ack sent for protocol ${protocol}, ${buffer2.toString(
+            "hex"
+          )}`
+        );
+      });
+    }, 2000);
   }
 }
 
