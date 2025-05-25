@@ -39,3 +39,20 @@ export const turnAlarmOnOff = (socket: net.Socket, value: string): string => {
   socket.write(softReset);
   return ack;
 };
+
+export const updateStatusInterval = (
+  socket: net.Socket,
+  value: string
+): string => {
+  const intValue = parseInt(value, 10);
+  if (isNaN(intValue)) {
+    console.error("Invalid status interval value");
+    return "";
+  }
+  const payloadHex = intValue.toString(16).padStart(2, "0");
+  const ack = `78780213${payloadHex}0d0a`;
+  const buffer = Buffer.from(ack, "hex");
+  socket.write(buffer);
+  // db.devices.updateInterval(imei, value);
+  return ack;
+};

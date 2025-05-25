@@ -11,6 +11,7 @@ import {
   restartDevice,
   turnAlarmOnOff,
   updateDeviceInterval,
+  updateStatusInterval,
 } from "./commands";
 import { devices } from "./devices";
 import { getCurrentGMTTimeHex } from "./utils/getCurrentGMTTimeHex";
@@ -60,6 +61,8 @@ app.patch("/devices/command/:id", async (req, res) => {
   let ack = "";
   if (protocol === "48") {
     ack = restartDevice(socket);
+  } else if (protocol === "13") {
+    ack = updateStatusInterval(socket, value);
   } else if (protocol === "49") {
     ack = turnAlarmOnOff(socket, value);
   } else if (protocol === "80") {
@@ -91,9 +94,7 @@ export function sendAck(
   if (protocol === "01") {
     ack = header + "0101" + footer;
   } else if (protocol === "13") {
-    // ack = hexStr;
     ack = hexStr;
-    ack2 = "78780213020D0A";
   } else if (protocol === "57") {
     ack = `78781F570258010000000000000000000000000000000000000000000000003B3B3B0D0A`;
   }
@@ -104,18 +105,6 @@ export function sendAck(
       `>> [SENT] Ack sent for protocol ${protocol}, ${buffer.toString("hex")}`
     );
   });
-  if (ack2) {
-    const buffer2 = Buffer.from(ack2, "hex");
-    setTimeout(() => {
-      socket.write(buffer, () => {
-        console.log(
-          `>> [SENT] Ack sent for protocol ${protocol}, ${buffer2.toString(
-            "hex"
-          )}`
-        );
-      });
-    }, 2000);
-  }
 }
 
 function decodeGpsCoordinate(coordHex: string): number {
