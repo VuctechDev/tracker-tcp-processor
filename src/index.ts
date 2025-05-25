@@ -60,14 +60,13 @@ app.patch("/devices/command/:id", async (req, res) => {
   let ack = "";
   if (protocol === "48") {
     ack = restartDevice(socket);
+  } else if (protocol === "49") {
+    ack = turnAlarmOnOff(socket, value);
   } else if (protocol === "80") {
     ack = getLocation(socket);
   } else if (protocol === "97") {
     ack = updateDeviceInterval(socket, value, imei);
   }
-  // else if (protocol === "49") {
-  // ack = turnAlarmOnOff(socket, value);
-  // }
   console.log(`[SENT] 0x${req.body.code} - IMEI: ${imei}, CODE: ${ack}`);
   res.json({ data: 1 });
 });
@@ -186,8 +185,36 @@ async function decodePacket(hexStr: string, socket: net.Socket) {
         received: hexStr,
         ack: "",
       });
-
-      // sendAck(socket, "80", hexStr);
+      break;
+    }
+    case "81": {
+      console.log(`[CHARGING] Full.`);
+      addLog({
+        imei: (socket as any).imei,
+        protocol,
+        received: hexStr,
+        ack: "NOT REPLIED: [CHARGING] Full.",
+      });
+      break;
+    }
+    case "82": {
+      console.log(`[CHARGING] True.`);
+      addLog({
+        imei: (socket as any).imei,
+        protocol,
+        received: hexStr,
+        ack: "NOT REPLIED: [CHARGING] True.",
+      });
+      break;
+    }
+    case "83": {
+      console.log(`[CHARGING] False.`);
+      addLog({
+        imei: (socket as any).imei,
+        protocol,
+        received: hexStr,
+        ack: "NOT REPLIED: [CHARGING] False.",
+      });
       break;
     }
     case "97": {
