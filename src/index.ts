@@ -87,10 +87,13 @@ export function sendAck(
   const length = "00";
   const footer = "0d0a";
   let ack = header + length + protocol + timeHex + footer;
+  let ack2 = "";
   if (protocol === "01") {
     ack = header + "0101" + footer;
   } else if (protocol === "13") {
+    // ack = hexStr;
     ack = hexStr;
+    ack2 = "78780213020D0A";
   } else if (protocol === "57") {
     ack = `78781F570258010000000000000000000000000000000000000000000000003B3B3B0D0A`;
   }
@@ -101,6 +104,16 @@ export function sendAck(
       `>> [SENT] Ack sent for protocol ${protocol}, ${buffer.toString("hex")}`
     );
   });
+  if (ack2) {
+    const buffer2 = Buffer.from(ack2, "hex");
+    socket.write(buffer, () => {
+      console.log(
+        `>> [SENT] Ack sent for protocol ${protocol}, ${buffer2.toString(
+          "hex"
+        )}`
+      );
+    });
+  }
 }
 
 function decodeGpsCoordinate(coordHex: string): number {
