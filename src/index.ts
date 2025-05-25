@@ -74,6 +74,21 @@ app.patch("/devices/command/:id", async (req, res) => {
   res.json({ data: 1 });
 });
 
+app.patch("/devices/raw-command/:id", async (req, res) => {
+  const imei = req.params.id;
+  const value = req.body?.value;
+  const socket = devices.get(imei);
+  if (!socket || !value) {
+    console.warn(`Socket not found for device or no value - ${imei}`);
+    res.json({ data: 1 });
+    return;
+  }
+  const buffer = Buffer.from(value, "hex");
+  socket.write(buffer);
+  console.log(`[RAW SENT] ${value} - IMEI: ${imei}`);
+  res.json({ data: 1 });
+});
+
 const bufferToHex = (buffer: Buffer) => buffer.toString("hex").toUpperCase();
 
 export const addLog = (data: LogCreateType) => {

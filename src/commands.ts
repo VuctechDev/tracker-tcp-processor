@@ -20,14 +20,14 @@ export const updateDeviceInterval = (
 };
 
 export const getLocation = (socket: net.Socket) => {
-  const ack = "787801800D0A";
+  const ack = "787801800d0a";
   const buffer = Buffer.from(ack, "hex");
   socket.write(buffer);
   return ack;
 };
 
 export const restartDevice = (socket: net.Socket): string => {
-  const ack = "78780248010D0A";
+  const ack = "78780248010d0a";
   const buffer = Buffer.from(ack, "hex");
   socket.write(buffer);
   return ack;
