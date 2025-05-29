@@ -11,6 +11,7 @@ interface DeviceType {
   version: number;
   status: "static" | "dynamic";
   createdAt: string;
+  updatedAt: string;
 }
 
 const get = async () => {
