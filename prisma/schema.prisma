@@ -27,7 +27,7 @@ model devices {
   name      String   @default("DeviceX")
   interval  String   @default("60")
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @updatedAt @default(now())
 }
 
 model logs {

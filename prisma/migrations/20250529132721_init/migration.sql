@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "devices" ALTER COLUMN "updatedAt" SET DEFAULT CURRENT_TIMESTAMP;

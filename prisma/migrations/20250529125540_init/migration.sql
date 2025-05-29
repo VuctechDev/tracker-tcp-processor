@@ -5,4 +5,4 @@
 
 */
 -- AlterTable
-ALTER TABLE "devices" ADD COLUMN "updatedAt" TIMESTAMP NOT NULL DEFAULT NOW();
+ALTER TABLE "devices" ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL;
