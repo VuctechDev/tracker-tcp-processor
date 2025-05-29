@@ -15,7 +15,11 @@ interface DeviceType {
 }
 
 const get = async () => {
-  return await prisma.devices.findMany();
+  return await prisma.devices.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 };
 
 const getByIMEI = async (imei: string) => {

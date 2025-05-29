@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "prisma generate && (npx prisma migrate resolve --rolled-back 20250529132721_init || true) && prisma migrate deploy && tsc",
+    "build": "prisma generate && prisma migrate deploy && tsc",
     "start": "node dist/index.js",
     "dev": "nodemon",
     "docker": "docker compose up -d",
