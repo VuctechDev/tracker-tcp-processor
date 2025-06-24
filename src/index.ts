@@ -313,16 +313,8 @@ app.listen(HTTP_PORT, () => {
 });
 
 app.get("/status", async (req, res) => {
-  const eventNames = server.eventNames();
-  const listeners = eventNames.reduce((acc: any, event) => {
-    acc[event] = server.listeners(event).length;
-    return acc;
-  }, {} as Record<string, number>);
-
   res.json({
-    message: "Registered listeners on TCP server",
-    events: eventNames,
-    listenerCounts: listeners,
+    status: "Running in dev",
   });
 });
 
