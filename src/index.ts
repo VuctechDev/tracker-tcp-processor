@@ -18,8 +18,8 @@ import { getCurrentGMTTimeHex } from "./utils/getCurrentGMTTimeHex";
 import { handleMultiLbsWifi } from "./decoders/handleMultiLbsWifi";
 import { LogCreateType } from "./db/logs";
 
-const HTTP_PORT = 2302;
-const TCP_PORT = 5555;
+const HTTP_PORT = process.env.HTTP_PORT;
+const TCP_PORT = process.env.TCP_PORT;
 const HOST = "0.0.0.0";
 
 const app = express();
