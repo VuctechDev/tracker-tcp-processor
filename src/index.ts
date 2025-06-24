@@ -18,10 +18,6 @@ import { getCurrentGMTTimeHex } from "./utils/getCurrentGMTTimeHex";
 import { handleMultiLbsWifi } from "./decoders/handleMultiLbsWifi";
 import { LogCreateType } from "./db/logs";
 
-const HTTP_PORT = 2302;
-const TCP_PORT = 5555;
-const HOST = "0.0.0.0";
-
 const app = express();
 
 app.use(
@@ -304,28 +300,36 @@ const server = net.createServer((socket) => {
   });
 });
 
-server.listen(TCP_PORT, HOST, () => {
-  console.log(`TCP listening on ${HOST}:${TCP_PORT}`);
-});
-app.listen(HTTP_PORT, () => {
-  db.devices.setAllOffline();
-  console.log(`HTTP server running at http://localhost:${HTTP_PORT}`);
-});
-
 app.get("/status", async (req, res) => {
-  const eventNames = server.eventNames();
-  const listeners = eventNames.reduce((acc: any, event) => {
-    acc[event] = server.listeners(event).length;
-    return acc;
-  }, {} as Record<string, number>);
-
   res.json({
-    message: "Registered listeners on TCP server",
-    events: eventNames,
-    listenerCounts: listeners,
+    status: `Running in ${process.env.NODE_ENV} mode`,
   });
 });
 
 server.on("error", (err) => {
   console.error(`Server Error: ${err.message}`);
 });
+
+const init = () => {
+  const HTTP_PORT = process.env.HTTP_PORT;
+  const TCP_PORT = process.env.TCP_PORT;
+  const HOST = "0.0.0.0";
+
+  if (!HTTP_PORT) {
+    console.error("No HTTP_PORT provided!");
+    return;
+  } else if (!TCP_PORT) {
+    console.error("No TCP_PORT provided!");
+    return;
+  }
+
+  server.listen(parseInt(TCP_PORT), HOST, () => {
+    console.log(`TCP listening on ${HOST}:${TCP_PORT}`);
+  });
+  app.listen(parseInt(HTTP_PORT), () => {
+    db.devices.setAllOffline();
+    console.log(`HTTP server running at http://localhost:${HTTP_PORT}`);
+  });
+};
+
+init();
