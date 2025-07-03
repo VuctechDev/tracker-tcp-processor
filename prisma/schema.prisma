@@ -32,7 +32,7 @@ model devices {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt @default(now())
 
-  organizationId  Int?  // make it optional first
+  organizationId  Int? 
   organization    organizations? @relation(fields: [organizationId], references: [id])
 
   records   records[] @relation("DeviceRecords")
