@@ -1,35 +1,22 @@
-/*
-  Warnings:
-
-  - Added the required column `organizationId` to the `devices` table without a default value. This is not possible if the table is not empty.
-
-*/
--- AlterTable
-ALTER TABLE "devices" ADD COLUMN     "organizationId" INTEGER NOT NULL;
-
 -- CreateTable
 CREATE TABLE "organizations" (
-    "id" SERIAL NOT NULL,
-    "name" TEXT NOT NULL,
-
-    CONSTRAINT "organizations_pkey" PRIMARY KEY ("id")
+    "id" SERIAL PRIMARY KEY,
+    "name" TEXT NOT NULL UNIQUE
 );
 
--- CreateTable
-CREATE TABLE "users" (
-    "id" SERIAL NOT NULL,
-    "name" TEXT NOT NULL,
-    "code" TEXT NOT NULL,
-    "organizationId" INTEGER NOT NULL,
+-- Insert Default organization (ensure id=1)
+INSERT INTO "organizations" ("id", "name")
+VALUES (1, 'Default')
+ON CONFLICT ("id") DO NOTHING;
 
-    CONSTRAINT "users_pkey" PRIMARY KEY ("id")
-);
-
--- CreateIndex
-CREATE UNIQUE INDEX "users_code_key" ON "users"("code");
+-- AlterTable: add organizationId with default 1 and NOT NULL
+ALTER TABLE "devices"
+ADD COLUMN "organizationId" INTEGER NOT NULL DEFAULT 1;
 
 -- AddForeignKey
-ALTER TABLE "devices" ADD CONSTRAINT "devices_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "users" ADD CONSTRAINT "users_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "devices"
+ADD CONSTRAINT "devices_organizationId_fkey"
+FOREIGN KEY ("organizationId")
+REFERENCES "organizations"("id")
+ON DELETE SET NULL
+ON UPDATE CASCADE;
