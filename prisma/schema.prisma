@@ -32,6 +32,8 @@ model devices {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt @default(now())
 
+  organizationId  Int? 
+  organization    organizations? @relation(fields: [organizationId], references: [id])
 
   records   records[] @relation("DeviceRecords")
 }
@@ -51,6 +53,7 @@ model organizations {
   name      String    @unique
 
   users     users[]
+  devices   devices[]
 }
 
 model users {

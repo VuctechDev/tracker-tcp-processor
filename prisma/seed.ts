@@ -14,21 +14,21 @@ async function main() {
   console.log(`[SEED] Default organization ensured: ${org.id} - ${org.name}`);
 
   // 2. Assign all devices without an organizationId to the Default organization
-  // const updated = await prisma.devices.updateMany({
-  //   where: {
-  //     OR: [
-  //       { organizationId: null },
-  //       { organizationId: { equals: undefined } }, // defensive check
-  //     ],
-  //   },
-  //   data: {
-  //     organizationId: org.id,
-  //   },
-  // });
+  const updated = await prisma.devices.updateMany({
+    where: {
+      OR: [
+        { organizationId: null },
+        { organizationId: { equals: undefined } }, // defensive check
+      ],
+    },
+    data: {
+      organizationId: org.id,
+    },
+  });
 
-  // console.log(
-  //   `[SEED] Assigned ${updated.count} devices to Default organization`
-  // );
+  console.log(
+    `[SEED] Assigned ${updated.count} devices to Default organization`
+  );
 }
 
 main()
