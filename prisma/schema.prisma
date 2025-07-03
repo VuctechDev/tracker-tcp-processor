@@ -14,7 +14,10 @@ model records {
   lat       Decimal  @db.Decimal(9, 6)
   speed     Int
   createdAt DateTime @default(now())
+
+  device devices @relation("DeviceRecords", fields: [deviceId], references: [imei])
 }
+
 
 model devices {
   id        Int      @id @default(autoincrement())
@@ -28,7 +31,13 @@ model devices {
   interval  String   @default("60")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt @default(now())
+
+  organizationId  Int?  // make it optional first
+  organization    organizations? @relation(fields: [organizationId], references: [id])
+
+  records   records[] @relation("DeviceRecords")
 }
+
 
 model logs {
   id        Int      @id @default(autoincrement())
@@ -37,4 +46,21 @@ model logs {
   received  String
   ack       String
   createdAt DateTime @default(now())
+}
+
+model organizations {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+
+  users     users[]
+  devices   devices[]
+}
+
+model users {
+  id              Int             @id @default(autoincrement())
+  name            String
+  code            String          @unique
+
+  organizationId  Int
+  organization    organizations   @relation(fields: [organizationId], references: [id])
 }
