@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  const orgName = "Default";
+  const orgName = "default-root-organization";
 
   // 1. Upsert Default organization
   const org = await prisma.organizations.upsert({
