@@ -3,6 +3,7 @@ const prisma = new PrismaClient();
 
 async function main() {
   const orgName = "default-root-organization";
+  const userName = "default-root-user";
 
   // 1. Upsert Default organization
   const org = await prisma.organizations.upsert({

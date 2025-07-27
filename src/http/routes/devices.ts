@@ -8,11 +8,19 @@ import {
   updateDeviceInterval,
   updateStatusInterval,
 } from "../../commands";
+import { handleFailedRequest } from "../handleFailedRequest";
 
 const router = express.Router();
 
 router.get("/", async (req, res) => {
-  const data = await db.devices.get();
+  const organizationId = req.headers.organizationId as string;
+  if (!organizationId) {
+    return handleFailedRequest(res, req, {
+      code: 400,
+      message: `organizationId is required`,
+    });
+  }
+  const data = await db.devices.getOrganizationDevices(organizationId);
   res.json({ data });
 });
 
@@ -23,9 +31,10 @@ router.patch("/command/:id", async (req, res) => {
   const socket = devices.get(imei);
 
   if (!socket) {
-    console.warn(`Socket not found for device ${imei}`);
-    res.json({ data: 1 });
-    return;
+    return handleFailedRequest(res, req, {
+      code: 400,
+      message: `Socket not found for device - ${imei}`,
+    });
   }
 
   let ack = "";
@@ -51,9 +60,10 @@ router.patch("/raw-command/:id", async (req, res) => {
   const socket = devices.get(imei);
 
   if (!socket || !value) {
-    console.warn(`Socket not found for device or no value - ${imei}`);
-    res.json({ data: 1 });
-    return;
+    return handleFailedRequest(res, req, {
+      code: 400,
+      message: `Socket not found for device or no value - ${imei}`,
+    });
   }
 
   const buffer = Buffer.from(value, "hex");

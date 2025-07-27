@@ -4,6 +4,8 @@ import db from "../db";
 import devicesRouter from "./routes/devices";
 import usersRouter from "./routes/users";
 import organizationsRouter from "./routes/organizations";
+import authRouter from "./routes/auth";
+import { authGuard } from "./middleware";
 
 const app = express();
 
@@ -14,9 +16,10 @@ app.use(
 );
 app.use(express.json());
 
-app.use("/devices", devicesRouter);
+app.use("/devices", authGuard, devicesRouter);
 app.use("/users", usersRouter);
 app.use("/organizations", organizationsRouter);
+app.use("/auth", authRouter);
 
 app.get("/data/:imei", async (req, res) => {
   const { imei } = req.params;
