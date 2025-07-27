@@ -30,10 +30,10 @@ const getByIMEI = async (imei: string) => {
   });
 };
 
-const getUserDevices = async (user: { organizationId: number }) => {
+const getOrganizationDevices = async (organizationId: string) => {
   return await prisma.devices.findMany({
     where: {
-      organizationId: user.organizationId,
+      organizationId: parseInt(organizationId),
     },
   });
 };
@@ -51,7 +51,6 @@ const create = async (imei: string) => {
       organization: {
         connect: { name: "default-root-organization" },
       },
-      // name: "",
     },
   });
   console.log(`[NEW DEVICE] Created ${imei}`);
@@ -94,7 +93,7 @@ const updateInterval = async (imei: string, interval: string) => {
 export {
   get,
   getByIMEI,
-  getUserDevices,
+  getOrganizationDevices,
   create,
   update,
   updateStatus,

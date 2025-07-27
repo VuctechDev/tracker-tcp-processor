@@ -13,6 +13,13 @@ interface DeviceType {
   updatedAt: string;
 }
 
+const get = async () => {
+  return await prisma.organizations.findFirst({
+    where: { id: 1 },
+    include: { devices: true, users: true },
+  });
+};
+
 const create = async (name: string) => {
   await prisma.organizations.create({
     data: {
@@ -24,4 +31,4 @@ const create = async (name: string) => {
 
 const update = async (data: StatusPacket) => {};
 
-export { create, update };
+export { get, create, update };

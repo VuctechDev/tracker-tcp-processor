@@ -15,33 +15,31 @@ model records {
   speed     Int
   createdAt DateTime @default(now())
 
-  device devices @relation("DeviceRecords", fields: [deviceId], references: [imei])
+  device devices @relation(name: "DeviceRecords", fields: [deviceId], references: [imei], onDelete: Cascade)
 }
-
 
 model devices {
-  id        Int      @id @default(autoincrement())
-  imei      String   @unique
-  code      String   @unique
-  battery   Int
-  signal    Int
-  version   Int
-  status    String
-  name      String   @default("DeviceX")
-  interval  String   @default("60")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt @default(now())
+  id             Int       @id @default(autoincrement())
+  imei           String    @unique
+  code           String    @unique
+  battery        Int
+  signal         Int
+  version        Int
+  status         String
+  name           String    @default("DeviceX")
+  interval       String    @default("60")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt @default(now())
 
-  organizationId  Int? 
-  organization    organizations? @relation(fields: [organizationId], references: [id])
+  organizationId Int?
+  organization   organizations? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
 
-  records   records[] @relation("DeviceRecords")
+  records        records[] @relation(name: "DeviceRecords")
 }
-
 
 model logs {
   id        Int      @id @default(autoincrement())
-  imei      String 
+  imei      String
   protocol  String
   received  String
   ack       String
@@ -49,18 +47,17 @@ model logs {
 }
 
 model organizations {
-  id        Int       @id @default(autoincrement())
-  name      String    @unique
+  id      Int      @id @default(autoincrement())
+  name    String   @unique
 
-  users     users[]
-  devices   devices[]
+  users   users[]
+  devices devices[]
 }
 
 model users {
   id              Int             @id @default(autoincrement())
   name            String
   code            String          @unique
-
   organizationId  Int
-  organization    organizations   @relation(fields: [organizationId], references: [id])
+  organization    organizations   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 }

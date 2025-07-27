@@ -2,17 +2,18 @@ import prisma from "./prizma";
 import { generateCode } from "../utils/generateCode";
 import { StatusPacket } from "../decoders/status";
 
-interface DeviceType {
+export interface UserType {
   id: number;
-  imei: string;
+  name: string;
   code: string;
-  battery: number;
-  signal: number;
-  version: number;
-  status: "static" | "dynamic";
-  createdAt: string;
-  updatedAt: string;
+  organizationId: number;
 }
+
+const getByCode = async (code: string) => {
+  return await prisma.users.findFirst({
+    where: { code },
+  });
+};
 
 const create = async (name: string) => {
   const code = generateCode();
@@ -30,4 +31,4 @@ const create = async (name: string) => {
 
 const update = async (data: StatusPacket) => {};
 
-export { create, update };
+export { getByCode, create, update };
