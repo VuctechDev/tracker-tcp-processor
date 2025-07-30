@@ -9,6 +9,7 @@ import {
   updateStatusInterval,
 } from "../../commands";
 import { handleFailedRequest } from "../handleFailedRequest";
+import { getDeviceAnalytics } from "../../lib/handlers/getDeviceAnalytics";
 
 const router = express.Router();
 
@@ -21,7 +22,15 @@ router.get("/", async (req, res) => {
     });
   }
   const data = await db.devices.getOrganizationDevices(organizationId);
-  res.json({ data });
+
+  const dataWithAnalytics = await Promise.all(
+    data.map(async (device) => ({
+      ...device,
+      analytics: await getDeviceAnalytics(device.imei),
+    }))
+  );
+
+  res.json({ data: dataWithAnalytics });
 });
 
 router.patch("/command/:id", async (req, res) => {

@@ -7,6 +7,7 @@ import db from "../db";
 import { parseGpsPacket } from "../decoders/gps";
 import { parseStatusPacket } from "../decoders/status";
 import { getCurrentGMTTimeHex } from "../utils/getCurrentGMTTimeHex";
+import { handleNewLocation } from "../lib/handlers/handleNewLocation";
 
 const bufferToHex = (buffer: Buffer) => buffer.toString("hex").toUpperCase();
 
@@ -35,8 +36,7 @@ async function decodePacket(hexStr: string, socket: net.Socket) {
     case "11": {
       const data = parseGpsPacket(hexStr, socket);
       if (data && data.imei) {
-        db.records.insert(data);
-        db.devices.updateStatus(data.imei, "dynamic");
+        await handleNewLocation(data);
       }
       sendAck(socket, protocol, hexStr, data?.dateTime);
       break;

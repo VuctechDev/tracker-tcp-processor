@@ -1,13 +1,9 @@
-// import { decodeAccessToken } from "../lib/services/jwt";
-// import { handleFailedRequest } from "./utils/handleFailedRequest";
-
 import { decodeAccessToken } from "../lib/jwt";
 import { handleFailedRequest } from "./handleFailedRequest";
 
 export const authGuard = (req: any, res: any, next: () => void) => {
   try {
     const token = req.headers.authorization?.replace("Bearer ", "");
-    console.log("token: ", token);
     if (!token) {
       return handleFailedRequest(res, req, {
         code: 401,

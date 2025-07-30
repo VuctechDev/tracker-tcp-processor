@@ -14,8 +14,7 @@ interface DeviceType {
 }
 
 const get = async () => {
-  return await prisma.organizations.findFirst({
-    where: { id: 1 },
+  return await prisma.organizations.findMany({
     include: { devices: true, users: true },
   });
 };

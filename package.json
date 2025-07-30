@@ -34,7 +34,8 @@
     "jsonwebtoken": "^9.0.2",
     "mysql": "^2.18.1",
     "net": "^1.0.2",
-    "prisma": "^6.7.0"
+    "prisma": "^6.7.0",
+    "redis": "^5.6.1"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

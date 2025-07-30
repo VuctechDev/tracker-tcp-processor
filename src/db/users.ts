@@ -9,26 +9,38 @@ export interface UserType {
   organizationId: number;
 }
 
+const get = async () => {
+  return await prisma.users.findMany({
+    include: { organization: true },
+  });
+};
+
 const getByCode = async (code: string) => {
   return await prisma.users.findFirst({
     where: { code },
   });
 };
 
-const create = async (name: string) => {
+const create = async (name: string, organizationId: number) => {
   const code = generateCode();
   await prisma.users.create({
     data: {
       name,
       code,
-      organization: {
-        connect: { name: "default-root-organization" },
-      },
+      organizationId,
     },
   });
   console.log(`[NEW USER] Created ${name} - ${code}`);
 };
 
-const update = async (data: StatusPacket) => {};
+const update = async (data: { id: number; organizationId: number }) => {
+  await prisma.users.update({
+    where: { id: data.id },
+    data: {
+      organizationId: data.organizationId,
+    },
+  });
+  console.log(`[UPDATED USER] Updated ${data.id}`);
+};
 
-export { getByCode, create, update };
+export { get, getByCode, create, update };

@@ -4,7 +4,7 @@ import { GpsPacket } from "../decoders/gps";
 import { Decimal } from "decimal.js";
 
 const insert = async (data: GpsPacket) => {
-  insertInDB(data);
+  // insertInDB(data);
   await prisma.records.create({
     data: {
       deviceId: data.imei,
@@ -25,6 +25,15 @@ const get = async () => {
   });
 };
 
+const getLastRecordByIMEI = async (imei: string) => {
+  return await prisma.records.findFirst({
+    where: { deviceId: imei },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+};
+
 const getByIMEI = async (imei: string) => {
   return await prisma.records.findMany({
     take: 200,
@@ -35,4 +44,4 @@ const getByIMEI = async (imei: string) => {
   });
 };
 
-export { get, getByIMEI, insert };
+export { get, getByIMEI, getLastRecordByIMEI, insert };
