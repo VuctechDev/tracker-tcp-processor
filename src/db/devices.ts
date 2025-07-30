@@ -19,6 +19,7 @@ const get = async () => {
     orderBy: {
       createdAt: "desc",
     },
+    include: { organization: true },
   });
 };
 
@@ -90,6 +91,17 @@ const updateInterval = async (imei: string, interval: string) => {
   });
 };
 
+const updateFromBO = async (data: {
+  name: string;
+  id: number;
+  organizationId: number;
+}) => {
+  await prisma.devices.update({
+    where: { id: data.id },
+    data: { name: data.name, organizationId: data.organizationId },
+  });
+};
+
 export {
   get,
   getByIMEI,
@@ -98,5 +110,6 @@ export {
   update,
   updateStatus,
   updateInterval,
+  updateFromBO,
   setAllOffline,
 };

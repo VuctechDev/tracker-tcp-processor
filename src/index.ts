@@ -4,7 +4,7 @@ import db from "./db";
 import { LogCreateType } from "./db/logs";
 import { httpInit } from "./http";
 import { tcpInit } from "./tcp";
-
+import { connectRedis } from "./lib";
 export const addLog = (data: LogCreateType) => {
   db.logs.insert(data);
 };
@@ -52,6 +52,7 @@ const init = () => {
     console.error("No TCP_PORT provided!");
     return;
   }
+  connectRedis();
 
   tcpInit(TCP_PORT, HOST);
   httpInit(HTTP_PORT);
