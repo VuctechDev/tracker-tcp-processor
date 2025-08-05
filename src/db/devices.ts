@@ -1,5 +1,5 @@
 import prisma from "./prizma";
-import { generateCode } from "../utils/generateCode";
+import { generateCode } from "../lib/utils/generateCode";
 import { StatusPacket } from "../decoders/status";
 
 interface DeviceType {
@@ -28,6 +28,7 @@ const getByIMEI = async (imei: string) => {
     where: {
       imei,
     },
+    include: { organization: true },
   });
 };
 

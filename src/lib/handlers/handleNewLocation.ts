@@ -1,24 +1,29 @@
 import db from "../../db";
 import { redis } from "..";
 import { GpsPacket } from "../../decoders/gps";
+import { checkGeofenceViolation, sendEmail } from "./checkGeofenceViolation";
+import { haversineDistance } from "../utils/haversineDistance";
 
-export function haversineDistance(
-  lat1: number,
-  lon1: number,
-  lat2: number,
-  lon2: number
-): number {
-  const R = 6371000; // Earth radius in meters
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+async function maybeSendNotification(deviceId: string, direction = "") {
+  const lastNotifKey = `device:${deviceId}:lastNotif`;
+  const now = Date.now();
 
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) ** 2;
+  const lastNotif = await redis.get(lastNotifKey);
 
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); // in meters
+  if (
+    !lastNotif ||
+    now - parseInt(lastNotif) >=
+      parseInt(process.env.STALE_NOTIFICATION_TIME ?? "3600000")
+  ) {
+    await sendEmail(deviceId, direction);
+    await redis.set(lastNotifKey, now.toString(), { EX: 3700 });
+    return true;
+  }
+
+  console.log(
+    `[ℹ️ SKIPPED] Notification already sent within the past hour for ${deviceId}`
+  );
+  return false;
 }
 
 export const handleNewLocation = async (data: GpsPacket) => {
@@ -28,6 +33,11 @@ export const handleNewLocation = async (data: GpsPacket) => {
   if (!lastLoc) {
     db.records.insert(data);
     db.devices.updateStatus(deviceId, "dynamic");
+
+    // const isInside = await checkGeofenceViolation(deviceId, data);
+    // if (!isInside) {
+    //   await maybeSendNotification(deviceId);
+    // }
     return;
   }
 
@@ -37,14 +47,16 @@ export const handleNewLocation = async (data: GpsPacket) => {
     data.latitude,
     data.longitude
   );
-  console.log("distance: ", distance);
 
-  if (distance < 10) return;
+  if (distance < 15) return;
   db.records.insert(data);
   db.devices.updateStatus(deviceId, "dynamic");
-
+  const { isInside, direction } = await checkGeofenceViolation(deviceId, data);
+  console.log("isInside: ", isInside);
+  if (!isInside) {
+    await maybeSendNotification(deviceId, direction);
+  }
   const timestamp = new Date().getTime();
-
   try {
     const zKey = `device:${deviceId}:distances`;
     await redis.zAdd(zKey, [{ score: timestamp, value: distance.toString() }]);

@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@prisma/client": "^6.7.0",
+    "@turf/turf": "^7.2.0",
     "cors": "^2.8.5",
     "decimal.js": "^10.5.0",
     "express": "^5.1.0",
