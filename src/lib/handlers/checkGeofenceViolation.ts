@@ -8,10 +8,12 @@ export const sendEmail = async (deviceId: string, direction: string) => {
   if (!device?.organization?.email) {
     return;
   }
-  return fetch(`https://emailer.pikado.net/emailer/send`, {
+  const API_KEY = process.env.EMAILER_API_KEY ?? "";
+  console.log(`[✅ EMAIL] API key: ${API_KEY}`);
+  const r = await fetch(`https://emailer.pikado.net/emailer/send`, {
     headers: {
       "Content-Type": "application/json",
-      apikey: process.env.EMAILER_API_KEY ?? "",
+      apikey: API_KEY,
     },
     method: "POST",
     body: JSON.stringify({
@@ -42,6 +44,8 @@ export const sendEmail = async (deviceId: string, direction: string) => {
       `,
     }),
   });
+  const d = await r.json();
+  console.log(`[✅ EMAIL] to ${device?.organization?.email} - ${d} `);
 };
 
 export const checkGeofenceViolation = async (

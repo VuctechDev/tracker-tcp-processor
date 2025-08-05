@@ -5,6 +5,7 @@ import { LogCreateType } from "./db/logs";
 import { httpInit } from "./http";
 import { tcpInit } from "./tcp";
 import { connectRedis } from "./lib";
+
 export const addLog = (data: LogCreateType) => {
   db.logs.insert(data);
 };
