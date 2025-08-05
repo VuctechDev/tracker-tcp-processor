@@ -1,6 +1,7 @@
 import db from "../../db";
 import { GpsPacket } from "../../decoders/gps";
 import * as turf from "@turf/turf";
+import { getCompassDirection } from "../utils/getCompassDirection";
 
 export const sendEmail = async (deviceId: string, direction: string) => {
   const device = await db.devices.getByIMEI(deviceId);
@@ -43,21 +44,6 @@ export const sendEmail = async (deviceId: string, direction: string) => {
   });
 };
 
-function getCompassDirection(bearing: number): string {
-  const directions = [
-    "north",
-    "northeast",
-    "east",
-    "southeast",
-    "south",
-    "southwest",
-    "west",
-    "northwest",
-  ];
-  const index = Math.round(((bearing + 360) % 360) / 45) % 8;
-  return directions[index];
-}
-
 export const checkGeofenceViolation = async (
   deviceId: string,
   data: GpsPacket
@@ -99,6 +85,6 @@ export const checkGeofenceViolation = async (
     return { isInside: false, direction };
   } catch (error) {
     console.error("Geofence validation error:", error);
-    return { isInside: false };
+    return { isInside: true };
   }
 };
