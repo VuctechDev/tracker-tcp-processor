@@ -45,7 +45,9 @@ export const sendEmail = async (deviceId: string, direction: string) => {
     }),
   });
   const d = await r.json();
-  console.log(`[✅ EMAIL] to ${device?.organization?.email} - ${d} `);
+  console.log(
+    `[✅ EMAIL] to ${device?.organization?.email} - ${JSON.stringify(d)}`
+  );
 };
 
 export const checkGeofenceViolation = async (
