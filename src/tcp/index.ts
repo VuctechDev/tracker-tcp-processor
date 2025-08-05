@@ -6,7 +6,7 @@ import { parseConnectionPacket } from "../decoders/connect";
 import db from "../db";
 import { parseGpsPacket } from "../decoders/gps";
 import { parseStatusPacket } from "../decoders/status";
-import { getCurrentGMTTimeHex } from "../utils/getCurrentGMTTimeHex";
+import { getCurrentGMTTimeHex } from "../lib/utils/getCurrentGMTTimeHex";
 import { handleNewLocation } from "../lib/handlers/handleNewLocation";
 
 const bufferToHex = (buffer: Buffer) => buffer.toString("hex").toUpperCase();

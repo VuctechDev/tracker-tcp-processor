@@ -2,11 +2,12 @@ import express from "express";
 import cors from "cors";
 import db from "../db";
 import devicesRouter from "./routes/devices";
-import usersRouter from "./routes/users";
-import organizationsRouter from "./routes/organizations";
 import authRouter from "./routes/auth";
 import boRouter from "./routes/bo";
+import geofenceRouter from "./routes/geofences";
+
 import { authGuard } from "./middleware";
+import { handleNewLocation } from "../lib/handlers/handleNewLocation";
 
 const app = express();
 
@@ -18,10 +19,9 @@ app.use(
 app.use(express.json());
 
 app.use("/devices", authGuard, devicesRouter);
-app.use("/users", usersRouter);
-app.use("/organizations", authGuard, organizationsRouter);
 app.use("/auth", authRouter);
-app.use("/bo", boRouter);
+app.use("/bo", authGuard, boRouter);
+app.use("/geofence", geofenceRouter);
 
 app.get("/data/:imei", async (req, res) => {
   const { imei } = req.params;
@@ -39,6 +39,13 @@ app.get("/status", async (req, res) => {
   res.json({
     status: `Running in ${process.env.NODE_ENV} mode`,
   });
+});
+
+app.post("/test/new-location", async (req, res) => {
+  const body = req.body;
+  console.log(body);
+  await handleNewLocation(body);
+  res.json({ data: true });
 });
 
 export const httpInit = (HTTP_PORT: string) => {

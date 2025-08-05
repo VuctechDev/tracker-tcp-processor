@@ -35,6 +35,7 @@ model devices {
   organization   organizations? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
 
   records        records[] @relation(name: "DeviceRecords")
+  geofence       geofences?
 }
 
 model logs {
@@ -49,7 +50,8 @@ model logs {
 model organizations {
   id      Int      @id @default(autoincrement())
   name    String   @unique
-
+  email   String   @default("")
+  lang    String   @default("")
   users   users[]
   devices devices[]
 }
@@ -60,4 +62,12 @@ model users {
   code            String          @unique
   organizationId  Int
   organization    organizations   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model geofences {
+  id          Int      @id @default(autoincrement())
+  deviceId    String   @unique
+  coordinates Json    
+  active      Boolean
+  device      devices  @relation(fields: [deviceId], references: [imei], onDelete: Cascade)
 }
