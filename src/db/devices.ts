@@ -1,6 +1,6 @@
 import prisma from "./prizma";
 import { generateCode } from "../lib/utils/generateCode";
-import { StatusPacket } from "../decoders/status";
+import { StatusPacket } from "../tcp/decoders/status";
 
 interface DeviceType {
   id: number;

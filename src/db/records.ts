@@ -1,5 +1,5 @@
+import { GpsPacket } from "../tcp/decoders/gps";
 import prisma from "./prizma";
-import { GpsPacket } from "../decoders/gps";
 import { Decimal } from "decimal.js";
 
 const insert = async (data: GpsPacket) => {

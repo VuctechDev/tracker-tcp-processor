@@ -1,5 +1,5 @@
+import { StatusPacket } from "../tcp/decoders/status";
 import prisma from "./prizma";
-import { StatusPacket } from "../decoders/status";
 
 interface DeviceType {
   id: number;
