@@ -1,11 +1,11 @@
 import net from "net";
 
 import { addLog, removeSocket, sendAck } from "..";
-import { handleMultiLbsWifi } from "../decoders/handleMultiLbsWifi";
-import { parseConnectionPacket } from "../decoders/connect";
+import { handleMultiLbsWifi } from "./decoders/handleMultiLbsWifi";
+import { parseConnectionPacket } from "./decoders/connect";
 import db from "../db";
-import { parseGpsPacket } from "../decoders/gps";
-import { parseStatusPacket } from "../decoders/status";
+import { parseGpsPacket } from "./decoders/gps";
+import { parseStatusPacket } from "./decoders/status";
 import { getCurrentGMTTimeHex } from "../lib/utils/getCurrentGMTTimeHex";
 import { handleNewLocation } from "../lib/handlers/handleNewLocation";
 

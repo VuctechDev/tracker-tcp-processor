@@ -1,6 +1,5 @@
 import prisma from "./prizma";
 import { generateCode } from "../lib/utils/generateCode";
-import { StatusPacket } from "../decoders/status";
 
 export interface UserType {
   id: number;

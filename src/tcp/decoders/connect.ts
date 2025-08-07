@@ -1,5 +1,5 @@
 import net from "net";
-import { devices } from "../devices";
+import { devices } from "../../devices";
 
 export function parseConnectionPacket(
   hexStr: string,
