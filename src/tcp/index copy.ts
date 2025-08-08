@@ -1,6 +1,5 @@
 import net from "net";
 
-import { addLog, removeSocket, sendAck } from "..";
 import { handleMultiLbsWifi } from "./decoders/handleMultiLbsWifi";
 import { parseConnectionPacket } from "./decoders/connect";
 import db from "../db";
@@ -9,6 +8,7 @@ import { parseStatusPacket } from "./decoders/status";
 import { getCurrentGMTTimeHex } from "../lib/utils/getCurrentGMTTimeHex";
 import { handleNewLocation } from "../lib/handlers/handleNewLocation";
 import { handleUnknown, protocolHandlers } from "./handlers";
+import { devices } from "../devices";
 
 const bufferToHex = (buffer: Buffer) => buffer.toString("hex").toUpperCase();
 
@@ -47,7 +47,7 @@ const server = net.createServer((socket) => {
   socket.on("close", () => {
     const imei = (socket as any).imei;
     if (imei) {
-      removeSocket(imei);
+      devices.delete(imei);
       db.devices.updateStatus(imei, "offline");
     }
     console.log(`Client disconnected: ${socket.remoteAddress} - ${imei}`);

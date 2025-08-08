@@ -36,10 +36,6 @@ export function sendAck(
     );
   });
 }
-const deviceSockets = new Map<string, net.Socket>();
-
-export const getSocket = (imei: string) => deviceSockets.get(imei);
-export const removeSocket = (imei: string) => deviceSockets.delete(imei);
 
 const init = () => {
   const HTTP_PORT = process.env.HTTP_PORT;

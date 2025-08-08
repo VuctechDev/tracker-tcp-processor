@@ -2,8 +2,8 @@ import db from "../../db";
 import { redis } from "..";
 import { checkGeofenceViolation } from "./checkGeofenceViolation";
 import { haversineDistance } from "../utils/haversineDistance";
-import { maybeSendNotification } from "../services/maybeSendNotification";
 import { GpsPacket } from "../../tcp/decoders/gps";
+import { shouldSendNotification } from "../services/geofence-notification/shouldSendNotification";
 
 export const handleNewLocation = async (data: GpsPacket) => {
   const deviceId = data.imei;
@@ -31,10 +31,10 @@ export const handleNewLocation = async (data: GpsPacket) => {
 
   db.records.insert(data);
   db.devices.updateStatus(deviceId, "dynamic");
-  const { isInside, direction } = await checkGeofenceViolation(deviceId, data);
+  const { isInside, bearing } = await checkGeofenceViolation(deviceId, data);
 
   if (!isInside) {
-    await maybeSendNotification(deviceId, direction);
+    await shouldSendNotification(deviceId, bearing);
   }
 
   const timestamp = new Date().getTime();
