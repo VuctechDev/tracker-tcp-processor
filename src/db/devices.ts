@@ -1,6 +1,6 @@
 import prisma from "./prizma";
-import { generateCode } from "../utils/generateCode";
-import { StatusPacket } from "../decoders/status";
+import { generateCode } from "../lib/utils/generateCode";
+import { StatusPacket } from "../tcp/decoders/status";
 
 interface DeviceType {
   id: number;
@@ -19,6 +19,7 @@ const get = async () => {
     orderBy: {
       createdAt: "desc",
     },
+    include: { organization: true },
   });
 };
 
@@ -26,6 +27,15 @@ const getByIMEI = async (imei: string) => {
   return await prisma.devices.findFirst({
     where: {
       imei,
+    },
+    include: { organization: true },
+  });
+};
+
+const getOrganizationDevices = async (organizationId: string) => {
+  return await prisma.devices.findMany({
+    where: {
+      organizationId: parseInt(organizationId),
     },
   });
 };
@@ -40,7 +50,9 @@ const create = async (imei: string) => {
       version: 1,
       status: "static",
       interval: "60",
-      name: "",
+      organization: {
+        connect: { name: "default-root-organization" },
+      },
     },
   });
   console.log(`[NEW DEVICE] Created ${imei}`);
@@ -80,12 +92,25 @@ const updateInterval = async (imei: string, interval: string) => {
   });
 };
 
+const updateFromBO = async (data: {
+  name: string;
+  id: number;
+  organizationId: number;
+}) => {
+  await prisma.devices.update({
+    where: { id: data.id },
+    data: { name: data.name, organizationId: data.organizationId },
+  });
+};
+
 export {
   get,
   getByIMEI,
+  getOrganizationDevices,
   create,
   update,
   updateStatus,
   updateInterval,
+  updateFromBO,
   setAllOffline,
 };

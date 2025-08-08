@@ -1,6 +1,4 @@
 import prisma from "./prizma";
-import { generateCode } from "../utils/generateCode";
-import { StatusPacket } from "../decoders/status";
 
 interface LogType {
   id: number;

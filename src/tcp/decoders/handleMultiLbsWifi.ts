@@ -1,5 +1,5 @@
 import net from "net";
-import { addLog } from "../index";
+import { addLog } from "../..";
 
 function parseWifi(hexStr: string, count: number, offset: number) {
   const wifiList = [];
