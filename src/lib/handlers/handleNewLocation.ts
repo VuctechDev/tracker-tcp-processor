@@ -4,7 +4,7 @@ import { checkGeofenceViolation } from "./checkGeofenceViolation";
 import { haversineDistance } from "../utils/haversineDistance";
 import { GpsPacket } from "../../tcp/decoders/gps";
 import { shouldSendNotification } from "../services/geofence-notification/shouldSendNotification";
-
+// 
 export const handleNewLocation = async (data: GpsPacket) => {
   const deviceId = data.imei;
   const lastLoc = await db.records.getLastRecordByIMEI(deviceId);
