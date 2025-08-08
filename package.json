@@ -11,7 +11,8 @@
     "gen": "npx prisma generate",
     "mig": "npx prisma migrate dev --name organinzation",
     "push": "GIT_SSH_COMMAND='ssh -i ~/.ssh/id_rsa_vuctech' git push --set-upstream origin development",
-    "studio": "npx prisma studio"
+    "studio": "npx prisma studio",
+    "pull": "GIT_SSH_COMMAND='ssh -i ~/.ssh/id_rsa_vuctech' git pull origin main"
   },
   "keywords": [],
   "author": "",
