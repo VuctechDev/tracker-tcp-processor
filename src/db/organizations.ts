@@ -1,7 +1,7 @@
 import { StatusPacket } from "../tcp/decoders/status";
 import prisma from "./prizma";
 
-interface DeviceType {
+interface OrganizationType {
   id: number;
   imei: string;
   code: string;
@@ -19,6 +19,12 @@ const get = async () => {
   });
 };
 
+const getById = async (organizationId: string) => {
+  return await prisma.organizations.findUnique({
+    where: { id: parseInt(organizationId) },
+  });
+};
+
 const create = async (name: string) => {
   await prisma.organizations.create({
     data: {
@@ -30,4 +36,4 @@ const create = async (name: string) => {
 
 const update = async (data: StatusPacket) => {};
 
-export { get, create, update };
+export { get, getById, create, update };

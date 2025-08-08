@@ -4,7 +4,8 @@ import db from "../db";
 import devicesRouter from "./routes/devices";
 import authRouter from "./routes/auth";
 import boRouter from "./routes/bo";
-import geofenceRouter from "./routes/geofences";
+import geofencesRouter from "./routes/geofences";
+import organizationsRouter from "./routes/organizations";
 
 import { authGuard } from "./middleware";
 import { handleNewLocation } from "../lib/handlers/handleNewLocation";
@@ -21,12 +22,15 @@ app.use(express.json());
 app.use("/devices", authGuard, devicesRouter);
 app.use("/auth", authRouter);
 app.use("/bo", authGuard, boRouter);
-app.use("/geofence", geofenceRouter);
+app.use("/geofence", authGuard, geofencesRouter);
+app.use("/organizations", authGuard, organizationsRouter);
 
 app.get("/data/:imei", async (req, res) => {
   const { imei } = req.params;
   const data = await db.records.getByIMEI(imei);
-  res.json({ data });
+  setTimeout(() => {
+    res.json({ data });
+  }, 3000);
 });
 
 app.get("/logs/:imei", async (req, res) => {

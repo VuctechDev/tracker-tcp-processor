@@ -1,6 +1,6 @@
 import net from "net";
 
-import { addLog, removeSocket, sendAck } from "..";
+import { addLog, sendAck } from "..";
 import { handleMultiLbsWifi } from "./decoders/handleMultiLbsWifi";
 import { parseConnectionPacket } from "./decoders/connect";
 import db from "../db";
@@ -8,6 +8,7 @@ import { parseGpsPacket } from "./decoders/gps";
 import { parseStatusPacket } from "./decoders/status";
 import { getCurrentGMTTimeHex } from "../lib/utils/getCurrentGMTTimeHex";
 import { handleNewLocation } from "../lib/handlers/handleNewLocation";
+import { devices } from "../devices";
 
 const bufferToHex = (buffer: Buffer) => buffer.toString("hex").toUpperCase();
 
@@ -151,12 +152,70 @@ async function decodePacket(hexStr: string, socket: net.Socket) {
   }
 }
 
+function parseHCS048Content(content: string): Record<string, any> {
+  const parts = content.split(";").filter(Boolean);
+  const result: Record<string, any> = {};
+
+  for (const part of parts) {
+    const [key, valuesStr] = part.split(":");
+    if (!key || !valuesStr) continue;
+
+    const values = valuesStr.split(",");
+    result[key.trim()] =
+      values.length === 1 ? values[0].trim() : values.map((v) => v.trim());
+  }
+
+  return result;
+}
+
+function parseHCS048Packet(raw: string) {
+  const noEnd = raw.slice(0, -1); // remove trailing $
+  const [header, imei, serial, lengthHex, ...rest] = noEnd.split("#");
+  if (header !== "S168" || !imei || !serial || !lengthHex || !rest.length)
+    return;
+
+  const content = rest.join("#");
+  const length = parseInt(lengthHex, 16);
+  if (content.length !== length) {
+    console.warn(`Length mismatch: expected ${length}, got ${content.length}`);
+  }
+
+  const contentObj = parseHCS048Content(content);
+  console.log(
+    `[HCS048] DATA: ${JSON.stringify({
+      imei,
+      serial,
+      length,
+      content,
+      contentObj,
+    })}`
+  );
+  return {
+    imei,
+    serial,
+    length,
+    content,
+    contentObj,
+  };
+}
+
 const server = net.createServer((socket) => {
   console.log(
     `Client connected from ${socket.remoteAddress}:${socket.remotePort}`
   );
-
   socket.on("data", (data) => {
+    const str = data.toString("utf8").trim();
+
+    if (str.startsWith("S168#") && str.endsWith("$")) {
+      console.log(`[HCS048] Raw: ${str}`);
+      const parsed = parseHCS048Packet(str);
+      if (parsed?.imei) {
+        (socket as any).imei = parsed.imei;
+        console.log(`[HCS048] IMEI: ${parsed.imei}`);
+      }
+      // Do something with parsed.content
+      return;
+    }
     const hexStr = bufferToHex(data);
     console.log(`[RECEIVED] ${hexStr} - IMEI: ${(socket as any).imei}`);
 
@@ -172,7 +231,7 @@ const server = net.createServer((socket) => {
   socket.on("close", () => {
     const imei = (socket as any).imei;
     if (imei) {
-      removeSocket(imei);
+      devices.delete(imei);
       db.devices.updateStatus(imei, "offline");
     }
     console.log(`Client disconnected: ${socket.remoteAddress} - ${imei}`);

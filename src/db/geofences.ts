@@ -1,6 +1,6 @@
 import prisma from "./prizma";
 
-export interface LogCreateType {
+export interface GeofenceType {
   imei: string;
   protocol: string;
   received: string;
