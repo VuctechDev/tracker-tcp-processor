@@ -10,7 +10,8 @@
     "docker": "docker compose up -d",
     "gen": "npx prisma generate",
     "mig": "npx prisma migrate dev --name organinzation",
-    "push": "GIT_SSH_COMMAND='ssh -i ~/.ssh/id_rsa_vuctech' git push --set-upstream origin development",
+    "push-dev": "GIT_SSH_COMMAND='ssh -i ~/.ssh/id_rsa_vuctech' git push --set-upstream origin development",
+    "push": "GIT_SSH_COMMAND='ssh -i ~/.ssh/id_rsa_vuctech' git push",
     "studio": "npx prisma studio",
     "pull": "GIT_SSH_COMMAND='ssh -i ~/.ssh/id_rsa_vuctech' git pull origin main"
   },

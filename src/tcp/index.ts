@@ -9,8 +9,10 @@ const server = net.createServer((socket) => {
     `[TCP] Client connected from ${socket.remoteAddress}:${socket.remotePort}`
   );
   socket.on("data", async (data) => {
-    await handleHCS048Data(socket, data);
-    await handle7878Data(socket, data);
+    const hcs = await handleHCS048Data(socket, data);
+    if (!hcs) {
+      await handle7878Data(socket, data);
+    }
   });
 
   socket.on("close", () => {

@@ -63,7 +63,7 @@ export const handleHCS048Data = async (socket: net.Socket, data: Buffer) => {
   }
 
   const str = data.toString("utf8");
-
+  console.warn(`[HCS048] Received ${str}`);
   // Dev guard 1: if we see more than one '$', we probably got multiple frames at once
   const dollarCount = (str.match(/\$/g) || []).length;
   if (dollarCount > 1) {
