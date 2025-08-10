@@ -8,12 +8,12 @@ const validateConnection = (data: Buffer) => {
   const str = data.toString("utf8").trim();
   const raw = str.slice(str.lastIndexOf("S168#")).trim();
 
-  const a = data.length < 5 || data[0] !== 0x78 || data[1] !== 0x78;
-  const b = !raw.startsWith("S168#") || !raw.endsWith("$");
+  const notBlack = data.length < 5 || data[0] !== 0x78 || data[1] !== 0x78;
+  const notHCS048 = !raw.startsWith("S168#") || !raw.endsWith("$");
 
   return {
-    black: a,
-    HCS048: b,
+    notBlack,
+    notHCS048,
   };
 };
 
@@ -22,17 +22,17 @@ const server = net.createServer((socket) => {
     `[TCP] Client connected from ${socket.remoteAddress}:${socket.remotePort}`
   );
   socket.on("data", async (data) => {
-    const { black, HCS048 } = validateConnection(data);
+    const { notBlack, notHCS048 } = validateConnection(data);
 
-    if (!black && !HCS048) {
+    if (notBlack && notHCS048) {
       console.log(`[TCP] Invalid connection - Socket destroyed!`);
       socket.destroy();
       return;
     }
 
-    if (black) {
+    if (!notBlack) {
       await handle7878Data(socket, data);
-    } else if (HCS048) {
+    } else if (!notHCS048) {
       await handleHCS048Data(socket, data);
     }
   });
