@@ -28,9 +28,7 @@ app.use("/organizations", authGuard, organizationsRouter);
 app.get("/data/:imei", async (req, res) => {
   const { imei } = req.params;
   const data = await db.records.getByIMEI(imei);
-  setTimeout(() => {
-    res.json({ data });
-  }, 3000);
+  res.json({ data });
 });
 
 app.get("/logs/:imei", async (req, res) => {

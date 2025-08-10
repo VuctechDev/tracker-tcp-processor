@@ -1,5 +1,5 @@
 import net from "net";
-import { addLog } from "../..";
+import { addLog } from "../protocols/7878/services";
 
 function parseWifi(hexStr: string, count: number, offset: number) {
   const wifiList = [];
@@ -49,7 +49,7 @@ function sendAck(
   );
 }
 
-export function handleMultiLbsWifi(
+export function handleMultiLbsWifiLogic(
   socket: net.Socket,
   hexStr: string,
   protocol: string
