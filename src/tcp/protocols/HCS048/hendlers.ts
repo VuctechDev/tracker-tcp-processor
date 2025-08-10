@@ -53,8 +53,8 @@ export const handleSync: PacketHandler = async ({
   // 96 → Battery at 96%
   // 73 → GSM signal strength 73/100
   const data = {
-    battery: contentObj?.STATUS?.[0] ?? 0,
-    signal: contentObj?.STATUS?.[1] ?? 0,
+    battery: parseInt(contentObj?.STATUS?.[0] ?? 0),
+    signal: parseInt(contentObj?.STATUS?.[1] ?? 0),
   };
   console.log(`[HCS048] SYNC: ${JSON.stringify(contentObj)}`);
   console.log(`[HCS048] SYNC DATA: ${JSON.stringify(data)}`);
@@ -76,7 +76,7 @@ export const handleLoca: PacketHandler = async ({ imei, contentObj, ack }) => {
     )} ${g[2].slice(6, 8)}:${g[2].slice(8, 10)}:${g[2].slice(10, 12)}`,
     latitude: parseFloat(g[3]),
     longitude: parseFloat(g[4]),
-    speed: parseFloat(g[5]),
+    speed: parseInt(g[5], 10),
     heading: parseFloat(g[6]),
     altitudeM: parseFloat(g[7]),
   });
