@@ -53,6 +53,7 @@ export const handleSync: PacketHandler = async ({
   // 96 → Battery at 96%
   // 73 → GSM signal strength 73/100
   const data = {
+    imei,
     battery: parseInt(contentObj?.STATUS?.[0] ?? 0),
     signal: parseInt(contentObj?.STATUS?.[1] ?? 0),
   };
