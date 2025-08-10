@@ -62,8 +62,8 @@ export const handleHCS048Data = async (socket: net.Socket, data: Buffer) => {
     (socket as any)._nodelaySet = true;
   }
 
-  const str = data.toString("utf8");
-  console.warn(`[HCS048] Received ${str}`);
+  const str = data.toString("utf8").trim();
+  console.warn(`[HCS048] Received Raw: ${str}`);
   // Dev guard 1: if we see more than one '$', we probably got multiple frames at once
   const dollarCount = (str.match(/\$/g) || []).length;
   if (dollarCount > 1) {
@@ -77,6 +77,8 @@ export const handleHCS048Data = async (socket: net.Socket, data: Buffer) => {
     console.warn(
       "[HCS048] Warning: partial frame (no trailing $). Consider buffering."
     );
+    console.log("[HCS048] Invalid frame. Socket destroyed!");
+    socket.destroy();
     return false; // bail for now during testing
   }
 
@@ -85,7 +87,7 @@ export const handleHCS048Data = async (socket: net.Socket, data: Buffer) => {
   const raw = str.slice(str.lastIndexOf("S168#")).trim();
 
   if (!raw.startsWith("S168#") || !raw.endsWith("$")) {
-    console.log("[HCS048] Invalid frame. Destroying socket for testing mode.");
+    console.log("[HCS048] Invalid frame. Socket destroyed!");
     socket.destroy();
     return false;
   }

@@ -8,7 +8,7 @@ export async function shouldSendNotification(deviceId: string, bearing = 0) {
   const lastNotif = await redis.get(lastNotifKey);
   const notifStaleTime = parseInt(process.env.STALE_NOTIFICATION_TIME ?? "60");
 
-  if (!lastNotif || now - parseInt(lastNotif) >=  1000) {
+  if (!lastNotif || now - parseInt(lastNotif) >= notifStaleTime * 60 * 1000) {
     await sendNotification(deviceId, bearing);
     await redis.set(lastNotifKey, now.toString(), { EX: 3700 });
     return true;
