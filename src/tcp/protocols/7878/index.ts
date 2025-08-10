@@ -1,7 +1,8 @@
 import net from "net";
 import { handleUnknown, protocolHandlers } from "./handlers";
 
-const bufferToHex = (buffer: Buffer) => buffer.toString("hex").toUpperCase();
+export const bufferToHex = (buffer: Buffer) =>
+  buffer.toString("hex").toUpperCase();
 
 const decodePacket = async (hexStr: string, socket: net.Socket) => {
   try {
