@@ -21,6 +21,7 @@ const server = net.createServer((socket) => {
   console.log(
     `[TCP] Client connected from ${socket.remoteAddress}:${socket.remotePort}`
   );
+
   socket.on("data", async (data) => {
     const { notBlack, notHCS048 } = validateConnection(data);
 
@@ -57,6 +58,8 @@ server.on("error", (err) => {
 
 export const tcpInit = (TCP_PORT: string, HOST: string) => {
   server.listen(parseInt(TCP_PORT), HOST, () => {
+    db.devices.setAllOffline();
+    devices.reset();
     console.log(`TCP app running on PORT: ${TCP_PORT}`);
   });
 };

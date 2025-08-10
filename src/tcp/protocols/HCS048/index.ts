@@ -1,7 +1,5 @@
-import db from "../../../db";
 import net from "net";
-import { getCurrentGMTTimeHex } from "../../../lib/utils/getCurrentGMTTimeHex";
-import { getCurrentGMTTime } from "../../../lib/utils/getCurrentGMTTime";
+import { dispatchHCS048 } from "./hendlers";
 
 const parseHCS048Content = (content: string): Record<string, any> => {
   const parts = content.split(";").filter(Boolean);
@@ -30,7 +28,7 @@ const parseHCS048Packet = (raw: string) => {
   }
   const contentObj = parseHCS048Content(content);
   console.log(
-    `[HCS048] DATA: ${JSON.stringify({
+    `[HCS048] PARSED DATA: ${JSON.stringify({
       imei,
       serial,
       length,
@@ -41,20 +39,6 @@ const parseHCS048Packet = (raw: string) => {
   return { imei, serial, length, content, contentObj };
 };
 
-export const sendHCS048Ack = (
-  socket: net.Socket,
-  imei: string,
-  serial: string,
-  type: "SYNC" | "LOCA" | string
-): void => {
-  const content =
-    type === "SYNC" ? `ACK^SYNC,${getCurrentGMTTime()}` : `ACK^${type}`;
-  const lenHex = content.length.toString(16).padStart(4, "0");
-  const frame = `S168#${imei}#${serial}#${lenHex}#${content}$`;
-  socket.write(frame, "utf8");
-  console.log(`[HCS048][TX] ${frame}`);
-};
-
 export const handleHCS048Data = async (socket: net.Socket, data: Buffer) => {
   // Optional: reduce coalescing (still no guarantees)
   if (!(socket as any)._nodelaySet) {
@@ -63,7 +47,7 @@ export const handleHCS048Data = async (socket: net.Socket, data: Buffer) => {
   }
 
   const str = data.toString("utf8").trim();
-  console.warn(`[HCS048] Received Raw: ${str}`);
+  console.log(`[HCS048] Received Raw: ${str}`);
   // Dev guard 1: if we see more than one '$', we probably got multiple frames at once
   const dollarCount = (str.match(/\$/g) || []).length;
   if (dollarCount > 1) {
@@ -79,7 +63,7 @@ export const handleHCS048Data = async (socket: net.Socket, data: Buffer) => {
     );
     console.log("[HCS048] Invalid frame. Socket destroyed!");
     socket.destroy();
-    return false; // bail for now during testing
+    return; // bail for now during testing
   }
 
   // If the device is well-behaved, we expect exactly one frame here.
@@ -89,30 +73,12 @@ export const handleHCS048Data = async (socket: net.Socket, data: Buffer) => {
   if (!raw.startsWith("S168#") || !raw.endsWith("$")) {
     console.log("[HCS048] Invalid frame. Socket destroyed!");
     socket.destroy();
-    return false;
+    return;
   }
 
-  console.log(`[HCS048] Raw: ${raw}`);
+  console.log(`[HCS048] RAW: ${raw}`);
   const parsed = parseHCS048Packet(raw);
-  if (!parsed) return false;
+  if (!parsed) return;
 
-  const { imei, serial, contentObj } = parsed;
-
-  if (imei) {
-    (socket as any).imei = imei;
-    const exists = await db.devices.getByIMEI(imei);
-    if (!exists) await db.devices.create(imei);
-    console.log(`[HCS048] IMEI: ${imei}`);
-  }
-
-  if (contentObj.SYNC !== undefined) {
-    console.log(`[HCS048] SYNC: ${JSON.stringify(contentObj)}`);
-    sendHCS048Ack(socket, imei!, serial!, "SYNC");
-  }
-  if (contentObj.LOCA !== undefined) {
-    console.log(`[HCS048] LOCA: ${JSON.stringify(contentObj)}`);
-    sendHCS048Ack(socket, imei!, serial!, "LOCA");
-  }
-
-  return true;
+  await dispatchHCS048(socket, raw, parsed);
 };

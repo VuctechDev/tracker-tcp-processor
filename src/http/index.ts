@@ -52,7 +52,6 @@ app.post("/test/new-location", async (req, res) => {
 
 export const httpInit = (HTTP_PORT: string) => {
   app.listen(parseInt(HTTP_PORT), () => {
-    db.devices.setAllOffline();
     console.log(`HTTP app running on PORT: ${HTTP_PORT}`);
   });
 };

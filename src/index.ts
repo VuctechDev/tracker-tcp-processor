@@ -1,7 +1,3 @@
-import net from "net";
-
-import db from "./db";
-import { LogCreateType } from "./db/logs";
 import { httpInit } from "./http";
 import { tcpInit } from "./tcp";
 import { connectRedis } from "./lib";
