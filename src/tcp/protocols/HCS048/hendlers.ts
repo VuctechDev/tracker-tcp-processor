@@ -3,6 +3,8 @@ import { getCurrentGMTTime } from "../../../lib/utils/getCurrentGMTTime";
 import db from "../../../db";
 import { devices } from "../../../devices";
 import { addLog } from "../7878/services";
+import { StatusPacket } from "../../decoders/status";
+import { GpsPacket } from "../../decoders/gps";
 
 type HCS048Parsed = {
   imei: string;
@@ -47,15 +49,48 @@ export const handleSync: PacketHandler = async ({
   contentObj,
   ack,
 }) => {
+  // [HCS048] SYNC: {"SYNC":"0001-271-7-1","STATUS":["96","73"]}
+  // 96 → Battery at 96%
+  // 73 → GSM signal strength 73/100
+  const data = {
+    battery: contentObj?.STATUS?.[0] ?? 0,
+    signal: contentObj?.STATUS?.[1] ?? 0,
+  };
+  console.log(`[HCS048] SYNC: ${JSON.stringify(contentObj)}`);
+  console.log(`[HCS048] SYNC DATA: ${JSON.stringify(data)}`);
   devices.set(imei, socket);
   db.devices.updateStatus(imei, "static");
-  console.log(`[HCS048] SYNC: ${JSON.stringify(contentObj)}`);
+  db.devices.update(data as StatusPacket);
   ack("SYNC");
 };
 
 export const handleLoca: PacketHandler = async ({ imei, contentObj, ack }) => {
+  // LOCA: {"LOCA":"G","CELL":["4","da","5","c8","1210e","27","33","297202","33","c8","13415","27","c8","12102","27"],"GDATA":["A","9","250811063210","44.716255","17.167983","1","0","0"],"ALERT":"0000","STATUS":["96","73"],"WIFI":"0"}
+  const parseGdata = (g: string[]) => ({
+    imei,
+    status: g[0] === "A" ? "valid" : "invalid",
+    satellites: parseInt(g[1], 10),
+    dateTime: `20${g[2].slice(0, 2)}-${g[2].slice(2, 4)}-${g[2].slice(
+      4,
+      6
+    )} ${g[2].slice(6, 8)}:${g[2].slice(8, 10)}:${g[2].slice(10, 12)}`,
+    latitude: parseFloat(g[3]),
+    longitude: parseFloat(g[4]),
+    speed: parseFloat(g[5]),
+    heading: parseFloat(g[6]),
+    altitudeM: parseFloat(g[7]),
+  });
+
+  if (contentObj.GDATA) {
+    const data = parseGdata(contentObj?.GDATA ?? []);
+    if (data) {
+      db.records.insert(data as unknown as GpsPacket);
+    }
+  }
+
   db.devices.updateStatus(imei, "dynamic");
   console.log(`[HCS048] LOCA: ${JSON.stringify(contentObj)}`);
+  console.log(`[HCS048] LOCA DATA: ${parseGdata(contentObj?.GDATA)}`);
   ack("LOCA");
 };
 

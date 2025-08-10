@@ -1,2 +1,4 @@
 email sent validation
 localization
+centriraj ekran na geofence sredinu
+sacuvaj device id in ls if not there falback to the first 

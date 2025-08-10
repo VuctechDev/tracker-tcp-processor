@@ -8,9 +8,9 @@ export interface GpsPacket {
   longitude: number;
   speed: number;
   heading: number;
-  north: boolean;
-  east: boolean;
-  positioned: boolean;
+  north?: boolean;
+  east?: boolean;
+  positioned?: boolean;
 }
 
 function decodeGpsCoordinate(hex: string, isPositive: boolean): number {
