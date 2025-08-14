@@ -13,6 +13,7 @@ export const authGuard = (req: any, res: any, next: () => void) => {
     const user = decodeAccessToken(token) as any;
     req.headers.userId = user?.id;
     req.headers.organizationId = user?.organizationId;
+    req.headers.role = user?.role ?? "user";
 
     next();
   } catch (error) {

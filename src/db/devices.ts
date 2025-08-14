@@ -2,16 +2,19 @@ import prisma from "./prizma";
 import { generateCode } from "../lib/utils/generateCode";
 import { StatusPacket } from "../tcp/decoders/status";
 
-interface DeviceType {
+export interface DeviceType {
+  name: string;
   id: number;
+  createdAt: Date;
   imei: string;
   code: string;
   battery: number;
   signal: number;
   version: number;
-  status: "static" | "dynamic";
-  createdAt: string;
-  updatedAt: string;
+  status: string;
+  interval: string;
+  updatedAt: Date;
+  organizationId: number | null;
 }
 
 const get = async () => {

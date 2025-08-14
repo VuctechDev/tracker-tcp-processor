@@ -5,6 +5,7 @@ import { devices } from "../../../devices";
 import { addLog } from "../7878/services";
 import { StatusPacket } from "../../decoders/status";
 import { GpsPacket } from "../../decoders/gps";
+import { handleNewLocation } from "../../../lib/handlers/handleNewLocation";
 
 type HCS048Parsed = {
   imei: string;
@@ -85,7 +86,7 @@ export const handleLoca: PacketHandler = async ({ imei, contentObj, ack }) => {
   if (contentObj.GDATA) {
     const data = parseGdata(contentObj?.GDATA ?? []);
     if (data) {
-      db.records.insert(data as unknown as GpsPacket);
+      handleNewLocation(data as unknown as GpsPacket);
     }
   }
 

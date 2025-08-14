@@ -10,18 +10,25 @@ import {
 } from "../../commands";
 import { handleFailedRequest } from "../handleFailedRequest";
 import { getDeviceAnalytics } from "../../lib/handlers/getDeviceAnalytics";
+import { DeviceType } from "../../db/devices";
 
 const router = express.Router();
 
 router.get("/", async (req, res) => {
   const organizationId = req.headers.organizationId as string;
+  const role = req.headers.role as string;
   if (!organizationId) {
     return handleFailedRequest(res, req, {
       code: 400,
       message: `organizationId is required`,
     });
   }
-  const data = await db.devices.getOrganizationDevices(organizationId);
+  let data: DeviceType[] = [];
+  if (role === "admin") {
+    data = await db.devices.get();
+  } else {
+    data = await db.devices.getOrganizationDevices(organizationId);
+  }
 
   const dataWithAnalytics = await Promise.all(
     data.map(async (device) => ({

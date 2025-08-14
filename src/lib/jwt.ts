@@ -5,13 +5,14 @@ import { UserType } from "../db/users";
 const ACCESS_SECRET = process.env.ACCESS_SECRET as Secret;
 const REFRESH_SECRET = process.env.REFRESH_SECRET as Secret;
 
-const generateAccessToken = (user: UserType) => {
+const generateAccessToken = (user: UserType, role?: string) => {
   // const json = JSON.parse(JSON.stringify(user));
 
   return jwt.sign(
     {
       id: user?.id,
       organizationId: user?.organizationId,
+      role,
     },
     ACCESS_SECRET
     // {
