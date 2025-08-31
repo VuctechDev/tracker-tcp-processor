@@ -21,14 +21,15 @@ export const sendNotification = async (deviceId: string, bearing: number) => {
   );
 
   const API_KEY = process.env.EMAILER_API_KEY ?? "";
-  const r = await fetch(`https://emailer.pikado.net/emailer/send`, {
+  const EMAILER_URL = process.env.EMAILER_URL ?? "";
+  const r = await fetch(EMAILER_URL, {
     headers: {
       "Content-Type": "application/json",
       apikey: API_KEY,
     },
     method: "POST",
     body: JSON.stringify({
-      from: "Tracker App <info@pikado.net>",
+      from: "ePastir <noreply@vuctechdev.online>",
       to: email,
       subject,
       html,

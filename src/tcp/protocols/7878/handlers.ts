@@ -1,7 +1,7 @@
 import db from "../../../db";
 import net from "net";
 import { parseGpsPacket } from "../../decoders/gps";
-import { handleNewLocation } from "../../../lib/handlers/handleNewLocation";
+import { handleNewLocation } from "../../handleNewLocation";
 import { parseConnectionPacket } from "../../decoders/connect";
 import { parseStatusPacket } from "../../decoders/status";
 import { getCurrentGMTTimeHex } from "../../../lib/utils/getCurrentGMTTimeHex";

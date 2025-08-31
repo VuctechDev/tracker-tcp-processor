@@ -1,6 +1,6 @@
 import { httpInit } from "./http";
+import { connectRedis } from "./redis";
 import { tcpInit } from "./tcp";
-import { connectRedis } from "./lib";
 
 const init = () => {
   const HTTP_PORT = process.env.HTTP_PORT;

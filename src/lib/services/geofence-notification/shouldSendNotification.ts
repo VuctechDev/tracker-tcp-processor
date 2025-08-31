@@ -1,16 +1,12 @@
-import { redis } from "../..";
+import { redisMethodes } from "../../../redis";
 import { sendNotification } from "./sendNotification";
 
-export async function shouldSendNotification(deviceId: string, bearing = 0) {
-  const lastNotifKey = `device:${deviceId}:lastNotif`;
-  const now = Date.now();
+export const shouldSendNotification = async (deviceId: string, bearing = 0) => {
+  const { lastNotif, expired } = await redisMethodes.notification.get(deviceId);
 
-  const lastNotif = await redis.get(lastNotifKey);
-  const notifStaleTime = parseInt(process.env.STALE_NOTIFICATION_TIME ?? "60");
-
-  if (!lastNotif || now - parseInt(lastNotif) >= notifStaleTime * 60 * 1000) {
+  if (!lastNotif || expired) {
     await sendNotification(deviceId, bearing);
-    await redis.set(lastNotifKey, now.toString(), { EX: 3700 });
+    await redisMethodes.notification.insert(deviceId);
     return true;
   }
 
@@ -18,4 +14,4 @@ export async function shouldSendNotification(deviceId: string, bearing = 0) {
     `[ℹ️ SKIPPED] Notification already sent within the past hour for ${deviceId}`
   );
   return false;
-}
+};

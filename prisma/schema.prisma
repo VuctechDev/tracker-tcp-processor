@@ -14,7 +14,8 @@ model records {
   lat       Decimal  @db.Decimal(9, 6)
   speed     Int
   createdAt DateTime @default(now())
-
+  distance  Int      @default(0)   
+  
   device devices @relation(name: "DeviceRecords", fields: [deviceId], references: [imei], onDelete: Cascade)
 }
 

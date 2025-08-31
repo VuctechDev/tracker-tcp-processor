@@ -17,7 +17,7 @@ export const handleFailedRequest = (
   }
 ) => {
   console.log(
-    `FAILED REQUEST [${time()}]: ${req.method} : ${req.originalUrl}`, 
+    `FAILED REQUEST [${time()}]: ${req.method} : ${req.originalUrl}`,
     `ERROR: ${JSON.stringify(options.error)}`
   );
   return res.status(options.code).json({

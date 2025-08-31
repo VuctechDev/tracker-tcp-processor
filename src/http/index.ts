@@ -8,7 +8,7 @@ import geofencesRouter from "./routes/geofences";
 import organizationsRouter from "./routes/organizations";
 
 import { authGuard } from "./middleware";
-import { handleNewLocation } from "../lib/handlers/handleNewLocation";
+import { handleNewLocation } from "../tcp/handleNewLocation";
 
 const app = express();
 
@@ -52,6 +52,6 @@ app.post("/test/new-location", async (req, res) => {
 
 export const httpInit = (HTTP_PORT: string) => {
   app.listen(parseInt(HTTP_PORT), () => {
-    console.log(`HTTP app running on PORT: ${HTTP_PORT}`);
+    console.log(`✅ HTTP app running on PORT: ${HTTP_PORT}`);
   });
 };

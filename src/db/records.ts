@@ -2,7 +2,7 @@ import { GpsPacket } from "../tcp/decoders/gps";
 import prisma from "./prizma";
 import { Decimal } from "decimal.js";
 
-const insert = async (data: GpsPacket) => {
+const insert = async (data: GpsPacket, distance?: number) => {
   await prisma.records.create({
     data: {
       deviceId: data.imei,
@@ -10,6 +10,7 @@ const insert = async (data: GpsPacket) => {
       long: new Decimal(`${data?.longitude}`),
       speed: data?.speed,
       createdAt: data?.dateTimeUTC ? new Date(data?.dateTimeUTC) : undefined,
+      distance,
     },
   });
 };
