@@ -61,6 +61,24 @@ const create = async (imei: string) => {
   console.log(`[NEW DEVICE] Created ${imei}`);
 };
 
+const createTest = async (imei: string) => {
+  const last = imei.slice(-4);
+  await prisma.devices.create({
+    data: {
+      imei,
+      code: generateCode(),
+      battery: 0,
+      signal: 0,
+      version: 1,
+      status: "static",
+      interval: "60",
+      organizationId: 6,
+      name: `MockDevice${last}`,
+    },
+  });
+  console.log(`[NEW DEVICE] Created ${imei}`);
+};
+
 const update = async (data: StatusPacket) => {
   await prisma.devices.update({
     where: { imei: data.imei },
@@ -111,6 +129,7 @@ export {
   getByIMEI,
   getOrganizationDevices,
   create,
+  createTest,
   update,
   updateStatus,
   updateInterval,

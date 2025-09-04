@@ -18,11 +18,40 @@ const insert = async (data: GpsPacket, distance?: number) => {
 const get = async () => {
   return await prisma.records.findMany({
     take: 200,
+    // where: {
+    //   createdAt: {
+    //     gt: date, // "greater than" DATE format
+    //   },
+    // },
     orderBy: {
       createdAt: "desc",
     },
   });
 };
+
+// const get = async (date: Date) => {
+//   const records = await prisma.records.findMany({
+//     where: {
+//       createdAt: {
+//         gt: date,
+//       },
+//     },
+//     orderBy: {
+//       createdAt: "desc",
+//     },
+//   });
+
+//   if (records.length === 0) {
+//     const lastRecord = await prisma.records.findFirst({
+//       orderBy: {
+//         createdAt: "desc",
+//       },
+//     });
+//     return lastRecord ? [lastRecord] : [];
+//   }
+
+//   return records;
+// };
 
 const getLastRecordByIMEI = async (imei: string) => {
   return await prisma.records.findFirst({
