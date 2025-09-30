@@ -29,7 +29,7 @@ export const sendNotification = async (deviceId: string, bearing: number) => {
     },
     method: "POST",
     body: JSON.stringify({
-      from: "ePastir <noreply@vuctechdev.online>",
+      from: "ALERT - ePastir <noreply@vuctechdev.online>",
       to: email,
       subject,
       html,

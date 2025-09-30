@@ -26,8 +26,9 @@ app.use("/geofence", authGuard, geofencesRouter);
 app.use("/organizations", authGuard, organizationsRouter);
 
 app.get("/data/:imei", async (req, res) => {
+  const interval = req.query?.interval ?? "3";
   const { imei } = req.params;
-  const data = await db.records.getByIMEI(imei);
+  const data = await db.records.getByIMEI(imei, interval as string);
   res.json({ data });
 });
 

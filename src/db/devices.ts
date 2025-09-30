@@ -37,6 +37,9 @@ const getByIMEI = async (imei: string) => {
 
 const getOrganizationDevices = async (organizationId: string) => {
   return await prisma.devices.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
     where: {
       organizationId: parseInt(organizationId),
     },
@@ -62,7 +65,7 @@ const create = async (imei: string) => {
 };
 
 const createTest = async (imei: string) => {
-  const last = imei.slice(-4);
+  const last = imei.slice(-6);
   await prisma.devices.create({
     data: {
       imei,
@@ -73,7 +76,7 @@ const createTest = async (imei: string) => {
       status: "static",
       interval: "60",
       organizationId: 6,
-      name: `MockDevice${last}`,
+      name: `NewDevice${last}`,
     },
   });
   console.log(`[NEW DEVICE] Created ${imei}`);

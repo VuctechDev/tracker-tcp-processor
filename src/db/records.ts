@@ -1,3 +1,4 @@
+import { sub } from "date-fns";
 import { GpsPacket } from "../tcp/decoders/gps";
 import prisma from "./prizma";
 import { Decimal } from "decimal.js";
@@ -62,10 +63,10 @@ const getLastRecordByIMEI = async (imei: string) => {
   });
 };
 
-const getByIMEI = async (imei: string) => {
+const getByIMEI = async (imei: string, interval = "3") => {
+  const since = sub(new Date(), { days: +interval });
   return await prisma.records.findMany({
-    take: 200,
-    where: { deviceId: imei },
+    where: { deviceId: imei, createdAt: { gte: since } },
     orderBy: {
       createdAt: "desc",
     },

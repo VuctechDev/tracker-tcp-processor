@@ -88,4 +88,22 @@ router.patch("/raw-command/:id", async (req, res) => {
   res.json({ data: 1 });
 });
 
+router.patch("/:id", async (req, res) => {
+  const body = req.body;
+  const organizationId = req.headers.organizationId as string;
+  const id = req.params.id as string;
+  if (!organizationId || !id || !body.name) {
+    return handleFailedRequest(res, req, {
+      code: 400,
+      message: "ID, name and organizationId required",
+    });
+  }
+  db.devices.updateFromBO({
+    id: +id,
+    organizationId: +organizationId,
+    name: body.name,
+  });
+  res.json({ data: 1 });
+});
+
 export default router;
