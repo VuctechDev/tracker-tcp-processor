@@ -34,7 +34,6 @@ router.get("/", async (req, res) => {
     data.map(async (device) => ({
       ...device,
       analytics: await getDeviceAnalytics(device.imei),
-      lastRecord: await db.records.getLastRecordByIMEI(device.imei),
     }))
   );
 

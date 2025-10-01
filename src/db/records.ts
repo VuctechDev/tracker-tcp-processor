@@ -36,12 +36,19 @@ const getLastRecordByIMEI = async (imei: string) => {
 
 const getByIMEI = async (imei: string, interval = "3") => {
   const since = sub(new Date(), { days: +interval });
-  return await prisma.records.findMany({
+  const data = await prisma.records.findMany({
     where: { deviceId: imei, createdAt: { gte: since } },
     orderBy: {
       createdAt: "desc",
     },
   });
+  if (data?.length) {
+    return data;
+  }
+
+  const lastRecord = await getLastRecordByIMEI(imei);
+
+  return lastRecord ? [lastRecord] : [];
 };
 
 export { get, getByIMEI, getLastRecordByIMEI, insert };
