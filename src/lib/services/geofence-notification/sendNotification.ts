@@ -15,6 +15,7 @@ export const sendNotification = async (deviceId: string, bearing: number) => {
   if (!email) return;
 
   const { subject, html } = notificationHTMLBuilder(
+    device.imei,
     device.name,
     direction,
     lang

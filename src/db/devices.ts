@@ -116,6 +116,17 @@ const updateInterval = async (imei: string, interval: string) => {
   });
 };
 
+const updateName = async (data: {
+  name: string;
+  imei: string;
+  organizationId: number;
+}) => {
+  await prisma.devices.update({
+    where: { imei: data.imei, organizationId: data.organizationId },
+    data: { name: data.name },
+  });
+};
+
 const updateFromBO = async (data: {
   name: string;
   id: number;
@@ -136,6 +147,7 @@ export {
   update,
   updateStatus,
   updateInterval,
+  updateName,
   updateFromBO,
   setAllOffline,
 };

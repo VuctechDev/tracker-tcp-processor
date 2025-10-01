@@ -34,6 +34,7 @@ router.get("/", async (req, res) => {
     data.map(async (device) => ({
       ...device,
       analytics: await getDeviceAnalytics(device.imei),
+      lastRecord: await db.records.getLastRecordByIMEI(device.imei),
     }))
   );
 
@@ -88,18 +89,18 @@ router.patch("/raw-command/:id", async (req, res) => {
   res.json({ data: 1 });
 });
 
-router.patch("/:id", async (req, res) => {
+router.patch("/:imei", async (req, res) => {
   const body = req.body;
   const organizationId = req.headers.organizationId as string;
-  const id = req.params.id as string;
-  if (!organizationId || !id || !body.name) {
+  const imei = req.params.imei as string;
+  if (!organizationId || !imei || !body.name) {
     return handleFailedRequest(res, req, {
       code: 400,
       message: "ID, name and organizationId required",
     });
   }
-  db.devices.updateFromBO({
-    id: +id,
+  db.devices.updateName({
+    imei: imei,
     organizationId: +organizationId,
     name: body.name,
   });
