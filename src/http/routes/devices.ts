@@ -30,14 +30,7 @@ router.get("/", async (req, res) => {
     data = await db.devices.getOrganizationDevices(organizationId);
   }
 
-  const dataWithAnalytics = await Promise.all(
-    data.map(async (device) => ({
-      ...device,
-      analytics: await getDeviceAnalytics(device.imei),
-    }))
-  );
-
-  res.json({ data: dataWithAnalytics });
+  res.json({ data });
 });
 
 router.patch("/command/:id", async (req, res) => {

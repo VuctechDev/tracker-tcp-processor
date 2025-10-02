@@ -4,6 +4,7 @@ import db from "../db";
 import devicesRouter from "./routes/devices";
 import authRouter from "./routes/auth";
 import boRouter from "./routes/bo";
+import analyticsRouter from "./routes/analytics";
 import geofencesRouter from "./routes/geofences";
 import organizationsRouter from "./routes/organizations";
 
@@ -24,6 +25,7 @@ app.use("/auth", authRouter);
 app.use("/bo", authGuard, boRouter);
 app.use("/geofence", authGuard, geofencesRouter);
 app.use("/organizations", authGuard, organizationsRouter);
+app.use("/analytics", authGuard, analyticsRouter);
 
 app.get("/data/:imei", async (req, res) => {
   const interval = req.query?.interval ?? "3";
