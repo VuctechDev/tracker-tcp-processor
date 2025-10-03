@@ -5,6 +5,7 @@ interface AnalyticsType {
   rows: { day: string; totalDistance: number }[];
   monthlyAverage: number;
   last24h: number;
+  hourly: any;
 }
 
 const get = async () => {
@@ -28,6 +29,7 @@ const getByIMEI = async (imei: string): Promise<AnalyticsType> => {
       distance: true,
     },
   });
+
   const past30Days = await prisma.records.groupBy({
     by: ["createdAt"],
     where: {
@@ -60,7 +62,34 @@ const getByIMEI = async (imei: string): Promise<AnalyticsType> => {
   ORDER BY 1
 `;
 
-  return { monthlyAverage, last24h: last24h._sum.distance ?? 0, rows };
+  const hourly = await prisma.$queryRaw<
+    { hour: string; hourTs: Date; totalDistance: number; samples: number }[]
+  >`WITH hours AS (
+    SELECT generate_series(
+      date_trunc('hour', (NOW() AT TIME ZONE 'Europe/Paris') - INTERVAL '23 hours'),
+      date_trunc('hour',  NOW() AT TIME ZONE 'Europe/Paris'),
+      INTERVAL '1 hour'
+    ) AS hour
+)
+SELECT
+  to_char(h.hour, 'YYYY-MM-DD HH24:00')           AS "hour",
+  h.hour                                          AS "hourTs",
+  COALESCE(SUM(r."distance")::double precision, 0) AS "totalDistance",
+  COALESCE(COUNT(r.*), 0)::int                     AS "samples"
+FROM hours h
+LEFT JOIN "records" r
+  ON r."deviceId" = ${imei}
+ AND ("createdAt" AT TIME ZONE 'Europe/Paris') >= h.hour
+ AND ("createdAt" AT TIME ZONE 'Europe/Paris') <  h.hour + INTERVAL '1 hour'
+GROUP BY h.hour
+ORDER BY h.hour;`;
+
+  return {
+    monthlyAverage,
+    last24h: last24h._sum.distance ?? 0,
+    rows,
+    hourly,
+  };
 };
 
 export { get, getByIMEI };
