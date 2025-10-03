@@ -66,8 +66,8 @@ const getByIMEI = async (imei: string): Promise<AnalyticsType> => {
     { hour: string; hourTs: Date; totalDistance: number; samples: number }[]
   >`WITH hours AS (
     SELECT generate_series(
-      date_trunc('hour', (NOW() AT TIME ZONE 'Europe/Paris') - INTERVAL '23 hours'),
-      date_trunc('hour',  NOW() AT TIME ZONE 'Europe/Paris'),
+      date_trunc('hour', NOW() - INTERVAL '23 hours'),
+      date_trunc('hour',  NOW()),
       INTERVAL '1 hour'
     ) AS hour
 )
@@ -79,8 +79,8 @@ SELECT
 FROM hours h
 LEFT JOIN "records" r
   ON r."deviceId" = ${imei}
- AND ("createdAt" AT TIME ZONE 'Europe/Paris') >= h.hour
- AND ("createdAt" AT TIME ZONE 'Europe/Paris') <  h.hour + INTERVAL '1 hour'
+ AND ("createdAt") >= h.hour
+ AND ("createdAt") <  h.hour + INTERVAL '1 hour'
 GROUP BY h.hour
 ORDER BY h.hour;`;
 
