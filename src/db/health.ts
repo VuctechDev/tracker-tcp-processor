@@ -26,7 +26,11 @@ const insert = async (data: StatusPacket) => {
 
 const getById = async (deviceId: string) => {
   return await prisma.health.findMany({
+    take: 500,
     where: { deviceId },
+    orderBy: {
+      createdAt: "desc",
+    },
   });
 };
 

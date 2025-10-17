@@ -27,7 +27,7 @@ app.use("/bo", authGuard, boRouter);
 app.use("/geofence", authGuard, geofencesRouter);
 app.use("/organizations", authGuard, organizationsRouter);
 app.use("/analytics", authGuard, analyticsRouter);
-app.use("/health", healthRouter);
+app.use("/health", authGuard, healthRouter);
 
 app.get("/data/:imei", async (req, res) => {
   const interval = req.query?.interval ?? "3";
