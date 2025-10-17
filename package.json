@@ -9,7 +9,7 @@
     "dev": "nodemon",
     "docker": "docker compose up -d",
     "gen": "npx prisma generate",
-    "mig": "npx prisma migrate dev --name organinzation",
+    "mig": "npx prisma migrate dev --name health",
     "push-dev": "GIT_SSH_COMMAND='ssh -i ~/.ssh/id_rsa_vuctech' git push --set-upstream origin development",
     "push": "GIT_SSH_COMMAND='ssh -i ~/.ssh/id_rsa_vuctech' git push",
     "studio": "npx prisma studio",

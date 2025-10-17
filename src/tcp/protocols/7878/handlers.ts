@@ -3,7 +3,7 @@ import net from "net";
 import { parseGpsPacket } from "../../decoders/gps";
 import { handleNewLocation } from "../../handleNewLocation";
 import { parseConnectionPacket } from "../../decoders/connect";
-import { parseStatusPacket } from "../../decoders/status";
+import {  parseStatusPacket } from "../../decoders/status";
 import { getCurrentGMTTimeHex } from "../../../lib/utils/getCurrentGMTTimeHex";
 import { handleMultiLbsWifiLogic } from "../../decoders/handleMultiLbsWifi";
 import { addLog, getProtocol, sendAck } from "./services";
@@ -73,6 +73,9 @@ const handleHeartbeat: PacketHandler = async (hexStr, socket) => {
 const handleStatusUpdate: PacketHandler = async (hexStr, socket) => {
   const data = parseStatusPacket(hexStr, socket);
   if (data?.imei) {
+    if (data.temp || data.steps || data.heartRate) {
+      db.health.insert(data);
+    }
     db.devices.update(data);
     db.devices.updateStatus(data.imei, "static");
   }

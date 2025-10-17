@@ -5,6 +5,7 @@ import * as users from "./users";
 import * as organizations from "./organizations";
 import * as geofences from "./geofences";
 import * as analytics from "./analytics";
+import * as health from "./health";
 
 export default {
   records,
@@ -14,4 +15,5 @@ export default {
   organizations,
   geofences,
   analytics,
+  health,
 };

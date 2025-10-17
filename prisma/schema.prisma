@@ -31,11 +31,14 @@ model devices {
   interval       String    @default("60")
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt @default(now())
+  temp           Int       @default(0)
+  charging       Boolean   @default(false)
 
   organizationId Int?
   organization   organizations? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
 
   records        records[] @relation(name: "DeviceRecords")
+  health         health[]
   geofence       geofences?
 }
 
@@ -63,6 +66,7 @@ model users {
   code            String          @unique
   organizationId  Int
   organization    organizations   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  @@index([organizationId])
 }
 
 model geofences {
@@ -71,4 +75,17 @@ model geofences {
   coordinates Json    
   active      Boolean
   device      devices  @relation(fields: [deviceId], references: [imei], onDelete: Cascade)
+  @@index([deviceId])
+}
+
+model health {
+  id          Int      @id @default(autoincrement())
+  deviceId    String 
+  temp        Int    
+  heartRate   Int
+  steps       Int
+  activity    Int
+  createdAt   DateTime @default(now())
+  device      devices  @relation(fields: [deviceId], references: [imei], onDelete: Cascade)
+  @@index([deviceId])
 }

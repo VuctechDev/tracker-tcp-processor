@@ -13,7 +13,10 @@ export interface DeviceType {
   version: number;
   status: string;
   interval: string;
+  temp: number;
+  charging: boolean;
   updatedAt: Date;
+  // TODO??: Add steps at the moment
   organizationId: number | null;
 }
 
@@ -56,6 +59,8 @@ const create = async (imei: string) => {
       version: 1,
       status: "static",
       interval: "60",
+      temp: 0,
+      charging: false,
       organization: {
         connect: { name: "default-root-organization" },
       },
@@ -75,6 +80,8 @@ const createTest = async (imei: string) => {
       version: 1,
       status: "static",
       interval: "60",
+      temp: 0,
+      charging: false,
       organizationId: 6,
       name: `NewDevice${last}`,
     },
@@ -89,6 +96,8 @@ const update = async (data: StatusPacket) => {
       battery: data.battery ?? 0,
       signal: data.signal ?? 0,
       version: data.version ?? 1,
+      temp: data.temp ?? 0,
+      charging: data.charging ?? false,
     },
   });
 };

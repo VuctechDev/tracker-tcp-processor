@@ -50,13 +50,12 @@ export const handleSync: PacketHandler = async ({
   contentObj,
   ack,
 }) => {
-  // [HCS048] SYNC: {"SYNC":"0001-271-7-1","STATUS":["96","73"]}
-  // 96 → Battery at 96%
-  // 73 → GSM signal strength 73/100
   const data = {
     imei,
     battery: parseInt(contentObj?.STATUS?.[0] ?? 0),
     signal: parseInt(contentObj?.STATUS?.[1] ?? 0),
+    temp: 0,
+    charging: false,
   };
   console.log(`[HCS048] SYNC: ${JSON.stringify(contentObj)}`);
   console.log(`[HCS048] SYNC DATA: ${JSON.stringify(data)}`);
