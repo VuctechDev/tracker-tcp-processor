@@ -148,10 +148,33 @@ const getByIMEI2 = async (imei: string, tz = "2"): Promise<any> => {
     imei
   );
 
+  const rows4 = await prisma.$queryRaw`
+  SELECT DISTINCT ON (date_utc)
+      id,
+      steps,
+      activity,
+      "createdAt",
+      date_utc
+  FROM (
+    SELECT
+      id,
+      steps,
+      activity,
+      "createdAt",
+      "createdAt"::date AS date_utc
+    FROM "health"
+    WHERE "deviceId" = ${imei}
+      AND "createdAt" >= NOW() - INTERVAL '30 days'
+  ) t
+  ORDER BY date_utc, steps DESC, "createdAt" DESC
+  LIMIT 30;
+`;
+
   return {
     last24h: last24h._sum.steps ?? 0,
     dailyMax,
-    rows,
+    // rows,
+    rows4,
   };
 };
 
