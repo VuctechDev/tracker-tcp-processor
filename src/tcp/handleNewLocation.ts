@@ -3,7 +3,6 @@ import { checkGeofenceViolation } from "../lib/handlers/checkGeofenceViolation";
 import { haversineDistance } from "../lib/utils/haversineDistance";
 import { GpsPacket } from "./decoders/gps";
 import { shouldSendNotification } from "../lib/services/geofence-notification/shouldSendNotification";
-import { redisMethodes } from "../redis";
 
 export const handleNewLocation = async (data: GpsPacket) => {
   const deviceId = data.imei;
@@ -31,6 +30,4 @@ export const handleNewLocation = async (data: GpsPacket) => {
   if (!isInside) {
     await shouldSendNotification(deviceId, bearing);
   }
-
-  await redisMethodes.distance.insert(deviceId, distance);
 };

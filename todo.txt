@@ -1,0 +1,16 @@
+email sent validation ✅
+localization ✅
+email url in env ✅
+sacuvaj device id in ls if not there falback to the first ✅
+navigate sa replace ✅
+inactivity alert
+uniformni GPS data parser ✅
+filter za rutu 1, 3 i 7 dana ✅
+optimizovati device status update
+push notif
+hendlaj charging status
+centriraj ekran na geofence sredinu
+Battery prediction
+koristi korake za analytics umjesto distance
+Device type i sim number + BO
+ukloni temp i steps sa device modela 

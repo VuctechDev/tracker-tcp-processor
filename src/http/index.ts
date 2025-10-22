@@ -26,7 +26,7 @@ app.use("/auth", authRouter);
 app.use("/bo", authGuard, boRouter);
 app.use("/geofence", authGuard, geofencesRouter);
 app.use("/organizations", authGuard, organizationsRouter);
-app.use("/analytics", authGuard, analyticsRouter);
+app.use("/analytics", analyticsRouter);
 app.use("/health", authGuard, healthRouter);
 
 app.get("/data/:imei", async (req, res) => {

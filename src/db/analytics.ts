@@ -1,5 +1,6 @@
 import { endOfDay, startOfDay, subDays } from "date-fns";
 import prisma from "./prizma";
+import { getTZ } from "../lib/utils/getTZ";
 
 interface AnalyticsType {
   rows: { day: string; totalDistance: number }[];
@@ -92,4 +93,63 @@ ORDER BY h.hour;`;
   };
 };
 
-export { get, getByIMEI };
+const getByIMEI2 = async (imei: string, tz = "2"): Promise<any> => {
+  const last24h = await prisma.health.aggregate({
+    where: {
+      deviceId: imei,
+      createdAt: {
+        gte: subDays(new Date(), 10),
+      },
+    },
+    _sum: {
+      steps: true,
+    },
+  });
+
+  const rows = await prisma.health.findMany({
+    select: { id: true, steps: true, activity: true, createdAt: true },
+    where: {
+      deviceId: imei,
+      createdAt: {
+        gte: subDays(new Date(), 1),
+      },
+    },
+  });
+
+  const tzName = getTZ(tz);
+
+  const dailyMax = await prisma.$queryRawUnsafe(
+    `
+    SELECT DISTINCT ON (date_local)
+        id,
+        steps,
+        activity,
+        "createdAt",
+        date_local
+    FROM (
+      SELECT
+        id,
+        steps,
+        activity,
+        "createdAt",
+        ("createdAt" AT TIME ZONE '${tzName}')::date AS date_local
+      FROM "health"
+      WHERE "deviceId" = $1
+        AND ("createdAt" AT TIME ZONE '${tzName}') >= (NOW() AT TIME ZONE '${tzName}') - INTERVAL '7 days'
+    ) t
+    ORDER BY
+        date_local,         
+        steps DESC,
+        "createdAt" DESC;    
+  `,
+    imei
+  );
+
+  return {
+    last24h: last24h._sum.steps ?? 0,
+    dailyMax,
+    rows,
+  };
+};
+
+export { get, getByIMEI, getByIMEI2 };

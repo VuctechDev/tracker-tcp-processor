@@ -25,6 +25,7 @@ model devices {
   code           String    @unique
   battery        Int
   signal         Int
+  timezone       Int       @default(0)
   version        Int
   status         String
   name           String    @default("DeviceX")
@@ -33,7 +34,7 @@ model devices {
   updatedAt      DateTime  @updatedAt @default(now())
   temp           Int       @default(0)
   charging       Boolean   @default(false)
-
+  
   organizationId Int?
   organization   organizations? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
 

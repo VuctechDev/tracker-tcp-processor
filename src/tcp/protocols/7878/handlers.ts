@@ -53,12 +53,7 @@ const handleConnection: PacketHandler = async (hexStr, socket) => {
   if (imei) {
     const exists = await db.devices.getByIMEI(imei);
     if (!exists) {
-      const testMode = process.env.TEST_MODE ?? false;
-      if (testMode) {
-        await db.devices.createTest(imei);
-      } else {
-        await db.devices.create(imei);
-      }
+      await db.devices.create(imei);
     }
   }
   sendAck(socket, hexStr);

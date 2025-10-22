@@ -50,26 +50,6 @@ const getOrganizationDevices = async (organizationId: string) => {
 };
 
 const create = async (imei: string) => {
-  await prisma.devices.create({
-    data: {
-      imei,
-      code: generateCode(),
-      battery: 0,
-      signal: 0,
-      version: 1,
-      status: "static",
-      interval: "60",
-      temp: 0,
-      charging: false,
-      organization: {
-        connect: { name: "default-root-organization" },
-      },
-    },
-  });
-  console.log(`[NEW DEVICE] Created ${imei}`);
-};
-
-const createTest = async (imei: string) => {
   const last = imei.slice(-6);
   await prisma.devices.create({
     data: {
@@ -78,12 +58,15 @@ const createTest = async (imei: string) => {
       battery: 0,
       signal: 0,
       version: 1,
+      timezone: 0,
       status: "static",
       interval: "60",
       temp: 0,
       charging: false,
-      organizationId: 6,
       name: `NewDevice${last}`,
+      organization: {
+        connect: { name: "default-root-organization" },
+      },
     },
   });
   console.log(`[NEW DEVICE] Created ${imei}`);
@@ -98,6 +81,7 @@ const update = async (data: StatusPacket) => {
       version: data.version ?? 1,
       temp: data.temp ?? 0,
       charging: data.charging ?? false,
+      timezone: data.timezone ?? 0,
     },
   });
 };
@@ -109,6 +93,13 @@ const updateStatus = async (
   await prisma.devices.update({
     where: { imei },
     data: { status: status ?? "static" },
+  });
+};
+
+const updateChargingStatus = async (imei: string, charging: boolean) => {
+  await prisma.devices.update({
+    where: { imei },
+    data: { charging: charging ?? false },
   });
 };
 
@@ -152,11 +143,11 @@ export {
   getByIMEI,
   getOrganizationDevices,
   create,
-  createTest,
   update,
   updateStatus,
   updateInterval,
   updateName,
+  updateChargingStatus,
   updateFromBO,
   setAllOffline,
 };

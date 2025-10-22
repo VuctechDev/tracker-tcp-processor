@@ -9,7 +9,6 @@ import {
   updateStatusInterval,
 } from "../../commands";
 import { handleFailedRequest } from "../handleFailedRequest";
-import { getDeviceAnalytics } from "../../lib/handlers/getDeviceAnalytics";
 import { DeviceType } from "../../db/devices";
 
 const router = express.Router();
