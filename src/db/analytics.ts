@@ -118,8 +118,7 @@ const getByIMEI2 = async (imei: string, tz = "2"): Promise<any> => {
 
   const tzName = getTZ(tz);
 
-  const dailyMax = await prisma.$queryRawUnsafe(
-    `
+  const dailyMax = await prisma.$queryRawUnsafe(`
     SELECT DISTINCT ON (date_local)
         id,
         steps,
@@ -131,19 +130,19 @@ const getByIMEI2 = async (imei: string, tz = "2"): Promise<any> => {
         id,
         steps,
         activity,
-        "createdAt",
+        "createdAt",                                  
+        ("createdAt" AT TIME ZONE '${tzName}')  AS local_ts,   
         ("createdAt" AT TIME ZONE '${tzName}')::date AS date_local
       FROM "health"
       WHERE "deviceId" = $1
+        -- compare in local time to get the last 7 local days window
         AND ("createdAt" AT TIME ZONE '${tzName}') >= (NOW() AT TIME ZONE '${tzName}') - INTERVAL '7 days'
     ) t
     ORDER BY
-        date_local,         
-        steps DESC,
-        "createdAt" DESC;    
-  `,
-    imei
-  );
+        date_local,     
+        steps DESC,    
+        local_ts DESC;
+  `, imei);
 
   return {
     last24h: last24h._sum.steps ?? 0,
